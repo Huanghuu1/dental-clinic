@@ -1,0 +1,6 @@
+# Generated runtime files
+__pycache__/
+*.pyc
+EVOLUTION.md
+skill.graph.json
+clean-code-report.json

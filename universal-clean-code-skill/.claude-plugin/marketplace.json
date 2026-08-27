@@ -1,0 +1,8 @@
+{
+  "name": "universal-clean-code-skill",
+  "version": "1.0.0",
+  "description": "Review and refactor local Java, Spring, Vue, JavaScript, TypeScript, and Python code with deterministic toolchain verification.",
+  "author": {
+    "name": "Huanghuu1"
+  }
+}

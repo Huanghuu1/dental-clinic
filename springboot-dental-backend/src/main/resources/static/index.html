@@ -1,0 +1,3034 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>齿悦口腔管理系统</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <style>
+    :root {
+      --teal: #087f78;
+      --teal-deep: #064b48;
+      --mint: #e5f6f1;
+      --mint-2: #c9eee5;
+      --ink: #183b39;
+      --muted: #68817d;
+      --bg: #f4f9f7;
+      --surface: #fff;
+      --line: #dcece7;
+      --blue: #2a78d6;
+      --orange: #eb6834;
+      --green: #1baf7a;
+      --gold: #eda100;
+      --pink: #e87ba4;
+      --red: #e34948;
+      --success: #16865d;
+      --danger: #d94747;
+      --warning: #b77b00;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(8, 79, 72, .08)
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body,
+    #app {
+      min-height: 100%;
+      margin: 0
+    }
+
+    body {
+      font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink)
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit
+    }
+
+    button {
+      cursor: pointer
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: .55
+    }
+
+    [v-cloak] {
+      display: none
+    }
+
+    .skip {
+      position: absolute;
+      left: -9999px
+    }
+
+    .skip:focus {
+      left: 10px;
+      top: 10px;
+      z-index: 1000;
+      background: #fff;
+      padding: 10px
+    }
+
+    .app-shell {
+      display: flex;
+      min-height: 100vh
+    }
+
+    .sidebar {
+      width: 248px;
+      flex: 0 0 248px;
+      background: linear-gradient(180deg, #063e3b, #052b2a);
+      color: #d9f2ea;
+      padding: 22px 14px;
+      display: flex;
+      flex-direction: column
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 0 10px 21px;
+      border-bottom: 1px solid rgba(255, 255, 255, .13)
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 39px;
+      height: 39px;
+      border-radius: 12px;
+      background: linear-gradient(140deg, #91e0ce, #159c90);
+      color: #073936;
+      font-size: 21px;
+      font-weight: 800
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 17px;
+      color: #fff
+    }
+
+    .brand small {
+      color: #8ebcb2;
+      font-size: 10px;
+      letter-spacing: 1.2px
+    }
+
+    .nav {
+      padding-top: 16px;
+      flex: 1
+    }
+
+    .nav-label {
+      color: #80a59d;
+      font-size: 10px;
+      letter-spacing: 1.4px;
+      padding: 12px 10px 6px
+    }
+
+    .nav-item {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: #c0d8d1;
+      padding: 11px 12px;
+      border-radius: 11px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 2px 0;
+      font-weight: 650
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(154, 231, 211, .15);
+      color: #fff
+    }
+
+    .nav-item.active {
+      box-shadow: inset 3px 0 #83dfcb
+    }
+
+    .nav-icon {
+      width: 18px;
+      text-align: center
+    }
+
+    .nav-count {
+      margin-left: auto;
+      background: #f5b73f;
+      color: #463000;
+      border-radius: 12px;
+      padding: 1px 7px;
+      font-size: 11px
+    }
+
+    .side-user {
+      border-top: 1px solid rgba(255, 255, 255, .13);
+      padding: 15px 10px 4px;
+      color: #c9ded9
+    }
+
+    .side-user small {
+      display: block;
+      color: #8ebcb2
+    }
+
+    .main {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column
+    }
+
+    .topbar {
+      height: 70px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 27px;
+      background: rgba(255, 255, 255, .94);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 20
+    }
+
+    .mobile-menu {
+      display: none
+    }
+
+    .top-title h1 {
+      font-size: 18px;
+      margin: 0
+    }
+
+    .top-title p {
+      margin: 1px 0 0;
+      color: var(--muted);
+      font-size: 12px
+    }
+
+    .top-spacer {
+      flex: 1
+    }
+
+    .profile {
+      display: flex;
+      align-items: center;
+      gap: 9px
+    }
+
+    .avatar {
+      width: 35px;
+      height: 35px;
+      border-radius: 11px;
+      background: var(--mint-2);
+      color: var(--teal-deep);
+      display: grid;
+      place-items: center;
+      font-weight: 800
+    }
+
+    .profile-name {
+      font-weight: 700;
+      font-size: 13px
+    }
+
+    .profile-role {
+      font-size: 11px;
+      color: var(--muted)
+    }
+
+    .content {
+      padding: 25px 27px 40px
+    }
+
+    .page-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 18px
+    }
+
+    .page-head h2 {
+      margin: 0;
+      font-size: 21px
+    }
+
+    .page-head p {
+      margin: 3px 0 0;
+      color: var(--muted)
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 8px rgba(8, 79, 72, .03)
+    }
+
+    .card-pad {
+      padding: 19px
+    }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 15px;
+      margin-bottom: 18px
+    }
+
+    .kpi {
+      padding: 18px;
+      position: relative;
+      overflow: hidden
+    }
+
+    .kpi:after {
+      content: "";
+      position: absolute;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      right: -26px;
+      bottom: -30px;
+      background: var(--mint)
+    }
+
+    .kpi-label {
+      color: var(--muted);
+      font-size: 12px
+    }
+
+    .kpi-value {
+      font-size: 27px;
+      font-weight: 800;
+      margin-top: 5px
+    }
+
+    .kpi-note {
+      font-size: 12px;
+      color: var(--teal);
+      margin-top: 4px
+    }
+
+    .charts {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 18px
+    }
+
+    .chart-title {
+      font-weight: 800;
+      font-size: 15px
+    }
+
+    .chart-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 2px 0 9px
+    }
+
+    .chart-box {
+      height: 245px
+    }
+
+    .chart-detail {
+      border-top: 1px solid var(--line);
+      margin-top: 8px;
+      padding-top: 10px
+    }
+
+    .chart-detail summary {
+      color: var(--teal-deep);
+      font-weight: 700;
+      cursor: pointer
+    }
+
+    .chart-table {
+      width: 100%;
+      margin-top: 8px;
+      border-collapse: collapse;
+      font-size: 12px
+    }
+
+    .chart-table th,
+    .chart-table td {
+      padding: 5px;
+      text-align: left;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .chart-table th {
+      color: var(--muted)
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 18px;
+      margin-top: 18px
+    }
+
+    .mini-list {
+      list-style: none;
+      padding: 0;
+      margin: 10px 0 0
+    }
+
+    .mini-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .mini-list li:last-child {
+      border-bottom: 0
+    }
+
+    .mini-main {
+      min-width: 0;
+      flex: 1
+    }
+
+    .mini-main b,
+    .mini-main small {
+      display: block
+    }
+
+    .mini-main small {
+      color: var(--muted)
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 16px 16px 0
+    }
+
+    .toolbar .grow {
+      flex: 1
+    }
+
+    .search,
+    .control {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 10px;
+      padding: 9px 11px;
+      color: var(--ink)
+    }
+
+    .search {
+      width: 230px
+    }
+
+    .tabs {
+      display: flex;
+      gap: 3px;
+      padding: 3px;
+      background: var(--mint);
+      border-radius: 11px
+    }
+
+    .tab {
+      border: 0;
+      background: transparent;
+      border-radius: 8px;
+      color: var(--muted);
+      padding: 7px 11px
+    }
+
+    .tab.active {
+      background: #fff;
+      color: var(--teal-deep);
+      box-shadow: 0 1px 5px rgba(0, 0, 0, .08)
+    }
+
+    .table-wrap {
+      overflow: auto;
+      padding: 13px 16px 16px
+    }
+
+    .data-table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 770px
+    }
+
+    .data-table th {
+      background: #f1f8f6;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: left;
+      padding: 11px 12px
+    }
+
+    .data-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle
+    }
+
+    .data-table tr:hover td {
+      background: #fbfefd
+    }
+
+    .entity {
+      display: flex;
+      align-items: center;
+      gap: 9px
+    }
+
+    .entity .mini-avatar {
+      width: 31px;
+      height: 31px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      background: var(--mint);
+      color: var(--teal-deep);
+      font-weight: 800
+    }
+
+    .entity small {
+      display: block;
+      color: var(--muted)
+    }
+
+    .tag,
+    .status {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap
+    }
+
+    .tag {
+      background: #eff7f5;
+      color: var(--teal-deep);
+      border: 1px solid var(--line)
+    }
+
+    .status.pending {
+      background: #fff3d6;
+      color: #9b6900
+    }
+
+    .status.done,
+    .status.paid {
+      background: #e6f6ee;
+      color: #14734f
+    }
+
+    .status.cancelled {
+      background: #f0f2f2;
+      color: #647470
+    }
+
+    .status.refunded {
+      background: #e9f0ff;
+      color: #2864ae
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap
+    }
+
+    .link-btn {
+      border: 0;
+      background: transparent;
+      color: var(--teal-deep);
+      padding: 4px 6px;
+      font-weight: 700
+    }
+
+    .link-btn.danger {
+      color: var(--danger)
+    }
+
+    .doctor-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px
+    }
+
+    .doctor-card {
+      padding: 18px
+    }
+
+    .doctor-header {
+      display: flex;
+      gap: 11px;
+      align-items: center
+    }
+
+    .doctor-card h3 {
+      margin: 0;
+      font-size: 16px
+    }
+
+    .doctor-card p {
+      margin: 2px 0;
+      color: var(--muted);
+      font-size: 12px
+    }
+
+    .doctor-meta {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 7px;
+      margin: 14px 0
+    }
+
+    .doctor-meta div {
+      background: #f3faf8;
+      border-radius: 9px;
+      padding: 8px
+    }
+
+    .doctor-meta span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px
+    }
+
+    .doctor-meta b {
+      font-size: 14px
+    }
+
+    .button {
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 9px 13px;
+      background: #fff;
+      color: var(--teal-deep);
+      font-weight: 750;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px
+    }
+
+    .button.primary {
+      background: linear-gradient(135deg, #098d84, #08716a);
+      color: #fff;
+      box-shadow: 0 6px 15px rgba(8, 127, 120, .22)
+    }
+
+    .button.soft {
+      background: var(--mint);
+      color: var(--teal-deep)
+    }
+
+    .button.outline {
+      border-color: var(--line)
+    }
+
+    .button.danger {
+      background: #fff0f0;
+      color: var(--danger)
+    }
+
+    .button.small {
+      padding: 6px 9px;
+      font-size: 12px
+    }
+
+    .empty {
+      padding: 34px;
+      text-align: center;
+      color: var(--muted)
+    }
+
+    .error-banner {
+      margin-bottom: 15px;
+      background: #fff0f0;
+      border: 1px solid #f5cccc;
+      color: #a13232;
+      padding: 11px 13px;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px
+    }
+
+    .loading {
+      padding: 80px;
+      text-align: center;
+      color: var(--muted)
+    }
+
+    .mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 46, 43, .47);
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 19px;
+      width: min(720px, 100%);
+      max-height: 92vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, .22)
+    }
+
+    .modal.wide {
+      width: min(890px, 100%)
+    }
+
+    .modal-head {
+      padding: 17px 21px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: start;
+      gap: 10px
+    }
+
+    .modal-head h2 {
+      font-size: 17px;
+      margin: 0
+    }
+
+    .modal-head p {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 12px
+    }
+
+    .modal-close {
+      margin-left: auto;
+      border: 0;
+      background: transparent;
+      font-size: 20px;
+      line-height: 1;
+      color: var(--muted);
+      padding: 2px 6px
+    }
+
+    .modal-body {
+      padding: 20px 21px;
+      overflow: auto
+    }
+
+    .modal-foot {
+      padding: 14px 21px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: flex-end;
+      gap: 9px;
+      background: #fafdfc
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px
+    }
+
+    .field.full {
+      grid-column: 1/-1
+    }
+
+    .field label {
+      display: block;
+      color: #4d6964;
+      font-size: 12px;
+      font-weight: 750;
+      margin-bottom: 5px
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 9px 10px;
+      background: #fbfefd;
+      color: var(--ink)
+    }
+
+    .field textarea {
+      min-height: 74px;
+      resize: vertical
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      outline: 3px solid rgba(8, 127, 120, .13);
+      border-color: var(--teal)
+    }
+
+    .help {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px
+    }
+
+    .choice {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 7px 9px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 12px
+    }
+
+    .choice.on {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff
+    }
+
+    .tooth-box {
+      padding: 12px;
+      background: #f3faf8;
+      border: 1px solid var(--line);
+      border-radius: 13px
+    }
+
+    .tooth-row {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin: 6px 0
+    }
+
+    .tooth-gap {
+      width: 18px
+    }
+
+    .tooth {
+      width: 29px;
+      min-width: 29px;
+      height: 36px;
+      border: 1px solid #b9d8d0;
+      border-radius: 7px;
+      background: #fff;
+      color: #55716c;
+      font-size: 10px
+    }
+
+    .tooth.on {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff
+    }
+
+    .tooth-caption {
+      text-align: center;
+      color: var(--muted);
+      font-size: 11px
+    }
+
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px
+    }
+
+    .slot {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 7px;
+      background: #fff;
+      color: var(--teal-deep);
+      font-size: 12px;
+      text-align: left
+    }
+
+    .slot small {
+      display: block;
+      color: var(--muted);
+      font-size: 10px
+    }
+
+    .slot.on {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff
+    }
+
+    .slot.on small {
+      color: #dff8f2
+    }
+
+    .slot:disabled {
+      background: #f2f4f4;
+      color: #a0aaa8
+    }
+
+    .drawer-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 46, 43, .36);
+      z-index: 79
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      z-index: 81;
+      width: min(480px, 100%);
+      height: 100vh;
+      background: #fff;
+      box-shadow: -12px 0 35px rgba(0, 0, 0, .15);
+      display: flex;
+      flex-direction: column
+    }
+
+    .drawer-head {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .drawer-body {
+      padding: 20px;
+      overflow: auto
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 10px
+    }
+
+    .detail-list div {
+      padding: 10px;
+      background: #f4faf8;
+      border-radius: 10px
+    }
+
+    .detail-list span {
+      display: block;
+      font-size: 11px;
+      color: var(--muted)
+    }
+
+    .detail-list b {
+      display: block;
+      margin-top: 2px
+    }
+
+    .toast-stack {
+      position: fixed;
+      right: 18px;
+      top: 18px;
+      z-index: 120;
+      display: grid;
+      gap: 9px
+    }
+
+    .toast {
+      background: #fff;
+      border-left: 4px solid var(--teal);
+      border-radius: 9px;
+      padding: 10px 13px;
+      box-shadow: var(--shadow);
+      min-width: 230px
+    }
+
+    .toast.error {
+      border-left-color: var(--danger)
+    }
+
+    .toast.info {
+      border-left-color: var(--blue)
+    }
+
+    .toast b,
+    .toast span {
+      display: block
+    }
+
+    .toast span {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    /* ===== 登录弹窗 · 现代医疗科技风 ===== */
+    .login-mask {
+      z-index: 110;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(11, 168, 154, 0.24), transparent 55%),
+        radial-gradient(circle at 20% 18%, rgba(9, 154, 141, 0.34), transparent 46%),
+        radial-gradient(circle at 82% 84%, rgba(8, 127, 120, 0.44), transparent 50%),
+        linear-gradient(135deg, rgba(4, 48, 45, 0.94), rgba(6, 82, 78, 0.86));
+      backdrop-filter: blur(6px);
+    }
+
+    .login {
+      position: relative;
+      width: min(412px, 100%);
+      background: rgba(255, 255, 255, 0.97);
+      border: 1px solid rgba(146, 230, 210, 0.45);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        0 0 0 1px rgba(146, 230, 210, 0.18),
+        0 14px 34px -10px rgba(2, 40, 38, 0.38),
+        0 40px 80px -22px rgba(2, 40, 38, 0.5);
+    }
+
+    .login-head {
+      position: relative;
+      overflow: hidden;
+      padding: 34px 34px 28px;
+      background: linear-gradient(135deg, #04302d 0%, #06524e 48%, #087f78 100%);
+      color: #fff;
+    }
+
+    /* 科技网格纹理：叠加在头部渐变之上，营造数据感 */
+    .login-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+      background-size: 26px 26px;
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    .login-glow {
+      position: absolute;
+      width: 260px;
+      height: 260px;
+      right: -90px;
+      top: -110px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(146, 230, 210, 0.42), transparent 68%);
+      pointer-events: none;
+    }
+
+    .login-brand {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .login-mark {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: linear-gradient(140deg, #9fe3d3, #3fbfae);
+      color: #04302d;
+      font-size: 22px;
+      font-weight: 800;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+    }
+
+    .login-brand-text h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 1px;
+      font-weight: 800;
+    }
+
+    .login-brand-text p {
+      margin: 3px 0 0;
+      font-size: 11px;
+      letter-spacing: 2px;
+      opacity: 0.72;
+    }
+
+    .login-tag {
+      position: relative;
+      margin: 18px 0 0;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .login-body {
+      position: relative;
+      padding: 30px 34px 32px;
+    }
+
+    .login-error {
+      padding: 10px 12px;
+      background: #fff0f0;
+      color: #b63030;
+      border: 1px solid #f5cccc;
+      border-radius: 10px;
+      font-size: 12.5px;
+      margin-bottom: 14px;
+    }
+
+    .login-fields {
+      display: grid;
+      gap: 14px;
+    }
+
+    /* 输入框外壳：承载内嵌前缀图标 */
+    .login-input {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .login .field label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #37474f;
+      margin-bottom: 6px;
+    }
+    .login-ic {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: #9db8b3;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      transition: color 0.25s;
+    }
+    .login-ic svg {
+      width: 18px;
+      height: 18px;
+    }
+    .login-input:focus-within .login-ic {
+      color: var(--teal);
+    }
+
+    /* 覆盖全局 .field：医疗科技输入框（左留位图标 + 聚焦薄荷光晕扩散） */
+    .login .field input {
+      width: 100%;
+      height: 48px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfefd;
+      padding: 0 14px 0 42px;
+      color: var(--ink);
+      font-size: 14.5px;
+      transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+    }
+    .login .field input::placeholder {
+      color: #aebfb9;
+    }
+    .login .field input:hover {
+      border-color: #9ed4cc;
+      background: #fff;
+    }
+    .login .field input:focus {
+      outline: none;
+      border-color: var(--teal);
+      background: #fff;
+      box-shadow: 0 0 0 1.5px var(--teal), 0 0 0 3px rgba(8, 180, 168, 0.22);
+    }
+
+    /* 主按钮：微角度渐变 + 顶部内高光 + 悬停上浮与阴影扩散（加载态复用 :disabled） */
+    .login-submit {
+      position: relative;
+      width: 100%;
+      height: 48px;
+      margin-top: 18px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      text-indent: 6px;
+      color: #fff;
+      background: linear-gradient(132deg, #0aa99b 0%, #087f78 52%, #066059 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 10px 24px -6px rgba(8, 127, 120, 0.42);
+      transition: transform 0.22s, box-shadow 0.22s, filter 0.22s;
+    }
+    .login-submit:not(:disabled):hover {
+      filter: brightness(1.06);
+      transform: translateY(-2px);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.36),
+        0 18px 36px -6px rgba(8, 127, 120, 0.52);
+    }
+    .login-submit:not(:disabled):active {
+      transform: translateY(0);
+      box-shadow: 0 8px 18px rgba(8, 127, 120, 0.32);
+    }
+    .login-submit:disabled {
+      cursor: not-allowed;
+      opacity: 0.9;
+      background: linear-gradient(135deg, #5cb3aa, #4aa39a 55%, #3f9087 100%);
+    }
+    .login-submit:disabled::before {
+      content: "";
+      display: inline-block;
+      width: 15px;
+      height: 15px;
+      margin-right: 9px;
+      vertical-align: -2px;
+      border: 2px solid rgba(255, 255, 255, 0.45);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: login-spin 0.7s linear infinite;
+    }
+    @keyframes login-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .login-foot {
+      margin: 16px 0 0;
+      padding-top: 14px;
+      border-top: 1px dashed var(--line);
+      text-align: center;
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+
+    .quick {
+      margin-top: 18px;
+      border-top: 1px solid var(--line);
+      padding-top: 14px
+    }
+
+    .quick p {
+      color: var(--muted);
+      font-size: 12px;
+      margin: 0 0 8px
+    }
+
+    .quick-users {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 7px
+    }
+
+    .quick-user {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 9px;
+      padding: 8px;
+      text-align: left;
+      color: var(--teal-deep);
+      font-weight: 750
+    }
+
+    .quick-user small {
+      display: block;
+      color: var(--muted);
+      font-weight: 500;
+      font-size: 10px
+    }
+
+    .login-note {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 11px
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0
+    }
+
+    @media(max-width:1100px) {
+      .kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+
+      .charts,
+      .section-grid {
+        grid-template-columns: 1fr
+      }
+
+      .doctor-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+    }
+
+    @media(max-width:760px) {
+      .sidebar {
+        display: none
+      }
+
+      .mobile-menu {
+        display: block
+      }
+
+      .topbar {
+        height: auto;
+        min-height: 62px;
+        padding: 10px 14px
+      }
+
+      .content {
+        padding: 18px 14px
+      }
+
+      .top-title p,
+      .profile-text {
+        display: none
+      }
+
+      .mobile-nav {
+        position: fixed;
+        inset: 62px 0 0 0;
+        background: #073b38;
+        z-index: 50;
+        padding: 12px;
+        overflow: auto
+      }
+
+      .mobile-nav .nav-item {
+        color: #d7eee8
+      }
+
+      .kpis {
+        grid-template-columns: 1fr
+      }
+
+      .doctor-grid {
+        grid-template-columns: 1fr
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr
+      }
+
+      .field.full {
+        grid-column: auto
+      }
+
+      .slot-grid {
+        grid-template-columns: repeat(3, 1fr)
+      }
+
+      .tooth-row {
+        gap: 2px
+      }
+
+      .tooth {
+        width: 24px;
+        min-width: 24px
+      }
+
+      .tooth-gap {
+        width: 8px
+      }
+
+      .modal-body {
+        padding: 16px
+      }
+
+      .modal-head,
+      .modal-foot {
+        padding-left: 16px;
+        padding-right: 16px
+      }
+    }
+
+    /* === 导航 SVG 图标适配：让内联矢量图标继承文字颜色与尺寸 === */
+    .nav-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .nav-icon svg {
+      width: 18px;
+      height: 18px;
+      display: block
+    }
+
+    /* === 病历弹窗快捷标签 === */
+    .quick-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px
+    }
+
+    .quick-tags .tag {
+      cursor: pointer
+    }
+
+    /* === 前端假分页控件 === */
+    .pager {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 12px 4px 0;
+      border-top: 1px solid var(--line);
+      margin-top: 6px
+    }
+
+    .pager-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 8px;
+      padding: 6px 12px;
+      color: var(--teal-deep);
+      font-weight: 700
+    }
+
+    .pager-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed
+    }
+
+    .pager-info {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    /* === 详情抽屉底部操作区 === */
+    .drawer-foot {
+      padding: 16px 20px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      gap: 9px;
+      background: #fafdfc
+    }
+
+    /* === 打印样式：隐藏非内容元素，仅铺满 A4 打印抽屉详情 === */
+    @media print {
+      body {
+        background: #fff !important
+      }
+
+      .sidebar,
+      .topbar,
+      .app-shell,
+      .drawer-mask,
+      .toast-stack,
+      .mask,
+      .mobile-nav {
+        display: none !important
+      }
+
+      .drawer {
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        box-shadow: none !important
+      }
+
+      .drawer-head,
+      .drawer-foot {
+        display: none !important
+      }
+
+      .drawer-body {
+        padding: 0 !important;
+        overflow: visible !important
+      }
+
+      .detail-list div {
+        background: #fff !important
+      }
+
+      .detail-list,
+      .detail-list b,
+      .detail-list span {
+        color: #000 !important
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app" v-cloak>
+    <a class="skip" href="#main-content">跳到主要内容</a>
+    <div class="app-shell" v-show="!auth.show">
+      <aside class="sidebar" aria-label="主导航">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">齿</div>
+          <div><strong>齿悦口腔</strong><small>DENTAL CARE</small></div>
+        </div>
+        <nav class="nav">
+          <template v-for="group in visibleNavGroups" :key="group.label">
+            <div class="nav-label">{{ group.label }}</div>
+            <button v-for="item in group.items" :key="item.key" class="nav-item" :class="{active:view === item.key}"
+              :aria-current="view === item.key ? 'page' : undefined" @click="goto(item.key)">
+              <span class="nav-icon" aria-hidden="true" v-html="item.icon"></span>{{ item.label }}
+              <span v-if="item.key === 'billing' && summary.unpaidCount" class="nav-count">{{ summary.unpaidCount
+                }}</span>
+            </button>
+          </template>
+        </nav>
+        <div v-if="currentUser" class="side-user"><b>{{ currentUser.realName }}</b><small>{{ roleLabel(currentUser.role)
+            }}</small></div>
+      </aside>
+      <div class="main">
+        <header class="topbar">
+          <button class="button soft mobile-menu" type="button" :aria-expanded="mobileOpen"
+            aria-controls="mobile-navigation" @click="mobileOpen=!mobileOpen">导航</button>
+          <div class="top-title">
+            <h1>{{ pageTitle }}</h1>
+            <p>{{ pageSub }}</p>
+          </div>
+          <div class="top-spacer"></div>
+          <button class="button outline small" type="button" :disabled="loading" @click="reloadCurrent">{{ loading ?
+            '加载中' : '刷新' }}</button>
+          <div v-if="currentUser" class="profile">
+            <div class="avatar">{{ initial(currentUser.realName) }}</div>
+            <div class="profile-text">
+              <div class="profile-name">{{ currentUser.realName }}</div>
+              <div class="profile-role">{{ roleLabel(currentUser.role) }}</div>
+            </div><button class="button outline small" type="button" @click="logout">退出</button>
+          </div>
+        </header>
+        <nav v-if="mobileOpen" id="mobile-navigation" class="mobile-nav" aria-label="移动导航">
+          <template v-for="group in visibleNavGroups" :key="group.label">
+            <div class="nav-label">{{ group.label }}</div>
+            <button v-for="item in group.items" :key="item.key" class="nav-item" :class="{active:view === item.key}"
+              :aria-current="view === item.key ? 'page' : undefined" @click="goto(item.key)"><span class="nav-icon"
+                v-html="item.icon"></span>{{ item.label }}</button>
+          </template>
+        </nav>
+        <main id="main-content" class="content">
+          <div v-if="loadError" class="error-banner" role="alert"><span>{{ loadError }}</span><button
+              class="button danger small" type="button" @click="reloadCurrent">重试</button></div>
+          <div v-if="initialLoading" class="loading" role="status">正在加载诊所数据…</div>
+          <template v-else>
+            <section v-if="view === 'dashboard'">
+              <div class="page-head">
+                <div>
+                  <h2>运营概览</h2>
+                  <p>以系统最新汇总数据了解今日接诊情况。</p>
+                </div>
+              </div>
+              <div class="kpis">
+                <article class="card kpi">
+                  <div class="kpi-label">今日预约</div>
+                  <div class="kpi-value">{{ summary.todayAppointments || 0 }}</div>
+                  <div class="kpi-note">含全部状态</div>
+                </article>
+                <article class="card kpi">
+                  <div class="kpi-label">待就诊</div>
+                  <div class="kpi-value">{{ summary.todayPending || 0 }}</div>
+                  <div class="kpi-note">今日尚待处理</div>
+                </article>
+                <article class="card kpi">
+                  <div class="kpi-label">本月新患者</div>
+                  <div class="kpi-value">{{ summary.newPatientsThisMonth || 0 }}</div>
+                  <div class="kpi-note">患者总数 {{ summary.totalPatients || 0 }}</div>
+                </article>
+                <article class="card kpi">
+                  <div class="kpi-label">本月实收</div>
+                  <div class="kpi-value">¥{{ money(summary.monthRevenue) }}</div>
+                  <div class="kpi-note">待收 ¥{{ money(summary.unpaidAmount) }}</div>
+                </article>
+              </div>
+              <div class="charts">
+                <article class="card card-pad">
+                  <div class="chart-title">近 7 日预约趋势</div>
+                  <div class="chart-sub">每日预约数量</div>
+                  <div id="appointment-trend" class="chart-box" role="img" aria-label="近七日预约趋势折线图"></div>
+                  <details class="chart-detail">
+                    <summary>查看趋势数据表</summary>
+                    <table class="chart-table">
+                      <caption class="visually-hidden">近七日预约数量</caption>
+                      <thead>
+                        <tr>
+                          <th scope="col">日期</th>
+                          <th scope="col">预约数量</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="point in trendData" :key="point.date">
+                          <td>{{ point.label }}</td>
+                          <td>{{ point.value }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </details>
+                </article>
+                <article class="card card-pad">
+                  <div class="chart-title">诊疗服务分布</div>
+                  <div class="chart-sub">当前已加载诊疗记录的服务次数</div>
+                  <div id="service-distribution" class="chart-box" role="img" aria-label="诊疗服务分布水平条形图"></div>
+                  <details class="chart-detail">
+                    <summary>查看服务分布数据表</summary>
+                    <table class="chart-table">
+                      <caption class="visually-hidden">诊疗服务分布</caption>
+                      <thead>
+                        <tr>
+                          <th scope="col">服务</th>
+                          <th scope="col">次数</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="item in serviceData" :key="item.name">
+                          <td><span class="tag">{{ item.name }}</span></td>
+                          <td>{{ item.value }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </details>
+                </article>
+              </div>
+              <div class="section-grid">
+                <article class="card card-pad">
+                  <div class="chart-title">今日待处理预约</div>
+                  <ul class="mini-list">
+                    <li v-for="item in todayPending" :key="item.id"><span class="tag">{{ item.time }}</span>
+                      <div class="mini-main"><b>{{ patientName(item.patientId) }}</b><small>{{ doctorName(item.doctorId)
+                          }} · {{ item.type }}</small></div><span class="status pending">待就诊</span>
+                    </li>
+                    <li v-if="!todayPending.length" class="empty">今日暂无待处理预约。</li>
+                  </ul>
+                </article>
+                <article class="card card-pad">
+                  <div class="chart-title">最近预约</div>
+                  <ul class="mini-list">
+                    <li v-for="item in recentAppointments" :key="item.id">
+                      <div class="mini-main"><b>{{ patientName(item.patientId) }}</b><small>{{ item.date }} {{ item.time
+                          }} · {{ item.type }}</small></div><span class="status"
+                        :class="appointmentClass(item.status)">{{ item.status }}</span>
+                    </li>
+                    <li v-if="!recentAppointments.length" class="empty">暂无预约记录。</li>
+                  </ul>
+                </article>
+              </div>
+            </section>
+
+            <section v-else-if="view === 'appointments'">
+              <div class="page-head">
+                <div>
+                  <h2>预约中心</h2>
+                  <p>安排、改期和处理就诊预约。</p>
+                </div><button class="button primary" type="button" @click="openAppointment()">新增预约</button>
+              </div>
+              <div class="card">
+                <div class="toolbar">
+                  <div class="tabs"><button v-for="tab in appointmentTabs" :key="tab.key" type="button" class="tab"
+                      :class="{active:appointmentFilter === tab.key}" @click="appointmentFilter=tab.key">{{ tab.label
+                      }}</button></div>
+                  <div class="grow"></div>
+                  <label class="visually-hidden" for="appointment-search">搜索预约</label>
+                  <input id="appointment-search" v-model.trim="appointmentSearch" class="search" placeholder="患者、编号或日期">
+                </div>
+                <div class="table-wrap">
+                  <table class="data-table">
+                    <caption class="visually-hidden">预约列表</caption>
+                    <thead>
+                      <tr>
+                        <th>编号</th>
+                        <th>患者</th>
+                        <th>项目</th>
+                        <th>医生</th>
+                        <th>日期时段</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="item in pagedAppointments" :key="item.id">
+                        <td>{{ item.code || '—' }}</td>
+                        <td>
+                          <div class="entity">
+                            <div class="mini-avatar">{{ initial(patientName(item.patientId)) }}</div>
+                            <div><b>{{ patientName(item.patientId) }}</b><small>{{ patientPhone(item.patientId)
+                                }}</small></div>
+                          </div>
+                        </td>
+                        <td>{{ item.type }}</td>
+                        <td>{{ doctorName(item.doctorId) }}</td>
+                        <td>{{ item.date }} {{ item.time }}</td>
+                        <td><span class="status" :class="appointmentClass(item.status)">{{ item.status }}</span></td>
+                        <td>
+                          <div class="row-actions">
+                            <button class="link-btn" type="button" @click="openDetail('appointment',item)">详情</button>
+                            <button v-if="item.status === '待就诊'" class="link-btn" type="button"
+                              :disabled="busy.appointment" @click="openAppointment(item)">改期</button>
+                            <button v-if="item.status === '待就诊'" class="link-btn" type="button"
+                              :disabled="busy.appointment" @click="completeAppointment(item)">完成</button>
+                            <button v-if="item.status === '待就诊'" class="link-btn danger" type="button"
+                              :disabled="busy.appointment" @click="cancelAppointment(item)">取消</button>
+                            <button class="link-btn danger" type="button" :disabled="busy.appointment"
+                              @click="deleteAppointment(item)">删除</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr v-if="!filteredAppointments.length">
+                        <td colspan="7">
+                          <div class="empty">没有符合条件的预约。</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="pager">
+                    <button type="button" class="pager-btn" :disabled="pages.appointments === 1"
+                      @click="pages.appointments = Math.max(1, pages.appointments - 1)">上一页</button>
+                    <span class="pager-info">{{ pages.appointments }} / {{ appointmentPageCount }}</span>
+                    <button type="button" class="pager-btn" :disabled="pages.appointments === appointmentPageCount"
+                      @click="pages.appointments = Math.min(appointmentPageCount, pages.appointments + 1)">下一页</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section v-else-if="view === 'patients'">
+              <div class="page-head">
+                <div>
+                  <h2>患者</h2>
+                  <p>维护患者基础档案及就诊历史。</p>
+                </div><button v-if="can(['ADMIN','STAFF'])" class="button primary" type="button"
+                  @click="openPatient()">新增患者</button>
+              </div>
+              <div class="card">
+                <div class="toolbar">
+                  <label class="visually-hidden" for="patient-search">搜索患者</label>
+                  <input id="patient-search" v-model.trim="patientSearch" class="search" placeholder="姓名或联系电话">
+                  <div class="grow"></div>
+                  <span class="help">共 {{ patients.length }} 位患者</span>
+                </div>
+                <div class="table-wrap">
+                  <table class="data-table">
+                    <caption class="visually-hidden">患者列表</caption>
+                    <thead>
+                      <tr>
+                        <th>患者</th>
+                        <th>性别</th>
+                        <th>年龄</th>
+                        <th>联系电话</th>
+                        <th>过敏史</th>
+                        <th>操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="item in pagedPatients" :key="item.id">
+                        <td>
+                          <div class="entity">
+                            <div class="mini-avatar">{{ initial(item.name) }}</div>
+                            <div><b>{{ item.name }}</b><small>{{ item.bloodType || '未登记' }} 型血</small></div>
+                          </div>
+                        </td>
+                        <td>{{ item.gender || '—' }}</td>
+                        <td>{{ item.age || '—' }}</td>
+                        <td>{{ item.phone || '—' }}</td>
+                        <td>{{ item.allergy || '无' }}</td>
+                        <td>
+                          <div class="row-actions">
+                            <button class="link-btn" type="button" @click="openDetail('patient',item)">详情</button>
+                            <button v-if="can(['ADMIN','STAFF'])" class="link-btn" type="button"
+                              @click="openPatient(item)">编辑</button>
+                            <button v-if="can(['ADMIN'])" class="link-btn danger" type="button"
+                              @click="deletePatient(item)">删除</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr v-if="!filteredPatients.length">
+                        <td colspan="6">
+                          <div class="empty">暂无患者记录。</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="pager">
+                    <button type="button" class="pager-btn" :disabled="pages.patients === 1"
+                      @click="pages.patients = Math.max(1, pages.patients - 1)">上一页</button>
+                    <span class="pager-info">{{ pages.patients }} / {{ patientPageCount }}</span>
+                    <button type="button" class="pager-btn" :disabled="pages.patients === patientPageCount"
+                      @click="pages.patients = Math.min(patientPageCount, pages.patients + 1)">下一页</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section v-else-if="view === 'records'">
+              <div class="page-head">
+                <div>
+                  <h2>医疗记录</h2>
+                  <p>查看每次检查和治疗的临床记录。</p>
+                </div><button v-if="can(['ADMIN','DOCTOR'])" class="button primary" type="button"
+                  @click="openRecord()">新建记录</button>
+              </div>
+              <div class="card">
+                <div class="toolbar">
+                  <div class="tabs"><button v-for="tab in recordTabs" :key="tab.key" type="button" class="tab"
+                      :class="{active:recordFilter === tab.key}" @click="recordFilter=tab.key">{{ tab.label }}</button>
+                  </div>
+                  <div class="grow"></div>
+                  <label class="visually-hidden" for="record-search">搜索医疗记录</label>
+                  <input id="record-search" v-model.trim="recordSearch" class="search" placeholder="患者、诊断或编号">
+                </div>
+                <div class="table-wrap">
+                  <table class="data-table">
+                    <caption class="visually-hidden">医疗记录列表</caption>
+                    <thead>
+                      <tr>
+                        <th>编号</th>
+                        <th>患者</th>
+                        <th>医生</th>
+                        <th>诊断</th>
+                        <th>服务</th>
+                        <th>牙位</th>
+                        <th>费用</th>
+                        <th>操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="item in pagedRecords" :key="item.id">
+                        <td>{{ item.code || '—' }}</td>
+                        <td>{{ patientName(item.patientId) }}</td>
+                        <td>{{ doctorName(item.doctorId) }}</td>
+                        <td>{{ item.diagnosis || '—' }}</td>
+                        <td><span v-for="service in item.services" :key="service" class="tag">{{ service }}</span></td>
+                        <td>{{ item.teeth.length ? item.teeth.join('、') : '—' }}</td>
+                        <td>¥{{ money(item.fee) }}</td>
+                        <td>
+                          <div class="row-actions">
+                            <button class="link-btn" type="button" @click="openDetail('record',item)">详情</button>
+                            <button v-if="can(['ADMIN'])" class="link-btn" type="button"
+                              @click="openRecord(item)">编辑</button>
+                            <button v-if="can(['ADMIN'])" class="link-btn danger" type="button"
+                              @click="deleteRecord(item)">删除</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr v-if="!filteredRecords.length">
+                        <td colspan="8">
+                          <div class="empty">暂无医疗记录。</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="pager">
+                    <button type="button" class="pager-btn" :disabled="pages.records === 1"
+                      @click="pages.records = Math.max(1, pages.records - 1)">上一页</button>
+                    <span class="pager-info">{{ pages.records }} / {{ recordPageCount }}</span>
+                    <button type="button" class="pager-btn" :disabled="pages.records === recordPageCount"
+                      @click="pages.records = Math.min(recordPageCount, pages.records + 1)">下一页</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section v-else-if="view === 'doctors'">
+              <div class="page-head">
+                <div>
+                  <h2>医生</h2>
+                  <p>查看医生专长和接诊工作量。</p>
+                </div><button v-if="can(['ADMIN'])" class="button primary" type="button"
+                  @click="openDoctor()">新增医生</button>
+              </div>
+              <div class="doctor-grid">
+                <article v-for="item in doctors" :key="item.id" class="card doctor-card">
+                  <div class="doctor-header">
+                    <div class="avatar">{{ initial(item.name) }}</div>
+                    <div>
+                      <h3>{{ item.name }}</h3>
+                      <p>{{ item.title || '医生' }}</p>
+                    </div>
+                  </div>
+                  <div class="chips" style="margin-top:13px"><span v-for="specialty in item.spec" :key="specialty"
+                      class="tag">{{ specialty }}</span><span v-if="!item.spec.length" class="tag">未设置专长</span></div>
+                  <div class="doctor-meta">
+                    <div><span>从业年限</span><b>{{ item.years || 0 }} 年</b></div>
+                    <div><span>本月接诊</span><b>{{ recordCountForDoctor(item.id) }}</b></div>
+                  </div>
+                  <div class="row-actions">
+                    <button class="button soft small" type="button" @click="openDetail('doctor',item)">详情</button>
+                    <button v-if="can(['ADMIN'])" class="button outline small" type="button"
+                      @click="openDoctor(item)">编辑</button>
+                    <button v-if="can(['ADMIN'])" class="button danger small" type="button"
+                      @click="deleteDoctor(item)">删除</button>
+                    <button v-if="can(['ADMIN','STAFF'])" class="button primary small" type="button"
+                      @click="openAppointment(null,item)">预约</button>
+                  </div>
+                </article>
+                <div v-if="!doctors.length" class="card empty">暂无可查看的医生。</div>
+              </div>
+            </section>
+
+            <section v-else-if="view === 'billing'">
+              <div class="page-head">
+                <div>
+                  <h2>账单</h2>
+                  <p>创建账单、确认收款或办理退款。</p>
+                </div><button class="button primary" type="button" @click="openBill()">新建账单</button>
+              </div>
+              <div class="card">
+                <div class="toolbar">
+                  <div class="tabs"><button v-for="tab in billTabs" :key="tab.key" type="button" class="tab"
+                      :class="{active:billFilter === tab.key}" @click="billFilter=tab.key">{{ tab.label }}</button>
+                  </div>
+                </div>
+                <div class="table-wrap">
+                  <table class="data-table">
+                    <caption class="visually-hidden">账单列表</caption>
+                    <thead>
+                      <tr>
+                        <th>编号</th>
+                        <th>患者</th>
+                        <th>收费项目</th>
+                        <th>金额</th>
+                        <th>支付方式</th>
+                        <th>日期</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="item in pagedBills" :key="item.id">
+                        <td>{{ item.code || '—' }}</td>
+                        <td>{{ patientName(item.patientId) }}</td>
+                        <td>{{ item.service }}</td>
+                        <td>¥{{ money(item.amount) }}</td>
+                        <td>{{ item.method || '—' }}</td>
+                        <td>{{ item.date || '—' }}</td>
+                        <td><span class="status" :class="billClass(item.status)">{{ item.status }}</span></td>
+                        <td>
+                          <div class="row-actions">
+                            <button class="link-btn" type="button" @click="openDetail('bill',item)">详情</button>
+                            <button v-if="item.status === '待支付'" class="link-btn" type="button" :disabled="busy.bill"
+                              @click="payBill(item)">收款</button>
+                            <button v-if="item.status === '已支付'" class="link-btn danger" type="button"
+                              :disabled="busy.bill" @click="refundBill(item)">退款</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr v-if="!filteredBills.length">
+                        <td colspan="8">
+                          <div class="empty">暂无账单。</div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="pager">
+                    <button type="button" class="pager-btn" :disabled="pages.bills === 1"
+                      @click="pages.bills = Math.max(1, pages.bills - 1)">上一页</button>
+                    <span class="pager-info">{{ pages.bills }} / {{ billPageCount }}</span>
+                    <button type="button" class="pager-btn" :disabled="pages.bills === billPageCount"
+                      @click="pages.bills = Math.min(billPageCount, pages.bills + 1)">下一页</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section v-else-if="view === 'settings'">
+              <div class="page-head">
+                <div>
+                  <h2>设置</h2>
+                  <p>管理员可以查看账号状态并启用或停用账号。</p>
+                </div><button class="button outline" type="button" :disabled="busy.users"
+                  @click="loadUsers">刷新账号</button>
+              </div>
+              <div class="doctor-grid">
+                <article v-for="item in users" :key="item.id" class="card doctor-card">
+                  <div class="doctor-header">
+                    <div class="avatar">{{ initial(item.realName) }}</div>
+                    <div>
+                      <h3>{{ item.realName }}</h3>
+                      <p>@{{ item.username }} · {{ roleLabel(item.role) }}</p>
+                    </div>
+                  </div>
+                  <div class="doctor-meta">
+                    <div><span>账号状态</span><b>{{ item.status === 1 ? '已启用' : '已停用' }}</b></div>
+                    <div><span>关联医生</span><b>{{ item.doctorId || '—' }}</b></div>
+                  </div>
+                  <button class="button" :class="item.status === 1 ? 'danger' : 'primary'" type="button"
+                    :disabled="busy.users || (currentUser && currentUser.id === item.id)"
+                    @click="toggleUserStatus(item)">{{ item.status === 1 ? '停用账号' : '启用账号' }}</button>
+                </article>
+                <div v-if="!users.length" class="card empty">暂无账号数据。</div>
+              </div>
+            </section>
+          </template>
+        </main>
+      </div>
+    </div>
+
+    <div v-if="appointmentModal.show" class="mask" @click.self="closeAppointment" @keydown.esc="closeAppointment">
+      <form class="modal" role="dialog" aria-modal="true" aria-labelledby="appointment-title"
+        @submit.prevent="saveAppointment">
+        <div class="modal-head">
+          <div>
+            <h2 id="appointment-title">{{ appointmentModal.editing ? '改期预约' : '新增预约' }}</h2>
+            <p>请选择可用的医生时间片。</p>
+          </div><button class="modal-close" type="button" aria-label="关闭预约窗口" @click="closeAppointment">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="field"><label for="appointment-patient">患者</label><select id="appointment-patient"
+                v-model.number="appointmentModal.form.patientId" required>
+                <option :value="null" disabled>请选择患者</option>
+                <option v-for="item in patients" :key="item.id" :value="item.id">{{ item.name }} · {{ item.phone }}
+                </option>
+              </select></div>
+            <div class="field"><label for="appointment-doctor">医生</label><select id="appointment-doctor"
+                v-model.number="appointmentModal.form.doctorId" :disabled="isDoctor" required>
+                <option :value="null" disabled>请选择医生</option>
+                <option v-for="item in doctors" :key="item.id" :value="item.id">{{ item.name }} · {{ item.spec[0] ||
+                  item.title }}</option>
+              </select></div>
+            <div class="field"><label for="appointment-type">预约项目</label><select id="appointment-type"
+                v-model="appointmentModal.form.type">
+                <option v-for="service in services" :key="service.name" :value="service.name">{{ service.name }}
+                </option>
+              </select></div>
+            <div class="field"><label for="appointment-date">预约日期</label><input id="appointment-date"
+                v-model="appointmentModal.form.date" type="date" :min="today()" required></div>
+            <div class="field full"><label>可用时段</label>
+              <div v-if="slots.loading" class="help" role="status">正在获取号源…</div>
+              <div v-else-if="slots.error" class="help" role="alert">{{ slots.error }} <button class="link-btn"
+                  type="button" @click="loadSlots">重试</button></div>
+              <div v-else-if="!appointmentModal.form.doctorId || !appointmentModal.form.date" class="help">请先选择医生和日期。
+              </div>
+              <div v-else class="slot-grid"><button v-for="slot in slots.items" :key="slot.timeSlot" type="button"
+                  class="slot" :class="{on:appointmentModal.form.time === slot.timeSlot}"
+                  :disabled="!slotSelectable(slot)" @click="appointmentModal.form.time=slot.timeSlot"><b>{{
+                    slot.timeSlot }}</b><small>{{ slot.current ? '当前预约' : (slotSelectable(slot) ? '余号'+slot.remainingQuota : '不可预约') }}</small></button></div>
+            </div>
+            <div class="field"><label for="appointment-visit">就诊类型</label><select id="appointment-visit"
+                v-model="appointmentModal.form.visitType">
+                <option>初诊</option>
+                <option>复诊</option>
+              </select></div>
+            <div class="field"><label for="appointment-note">备注</label><input id="appointment-note"
+                v-model.trim="appointmentModal.form.note" placeholder="可选说明"></div>
+          </div>
+        </div>
+        <div class="modal-foot"><button class="button outline" type="button"
+            @click="closeAppointment">取消</button><button class="button primary" type="submit"
+            :disabled="busy.appointment || slots.loading || !selectedSlotAvailable">{{ busy.appointment ? '保存中…' :
+            '保存预约' }}</button></div>
+      </form>
+    </div>
+
+    <div v-if="patientModal.show" class="mask" @click.self="patientModal.show=false"
+      @keydown.esc="patientModal.show=false">
+      <form class="modal" role="dialog" aria-modal="true" aria-labelledby="patient-title" @submit.prevent="savePatient">
+        <div class="modal-head">
+          <div>
+            <h2 id="patient-title">{{ patientModal.editing ? '编辑患者' : '新增患者' }}</h2>
+            <p>保存患者档案的基本信息。</p>
+          </div><button class="modal-close" type="button" aria-label="关闭患者窗口"
+            @click="patientModal.show=false">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="field"><label for="patient-name">姓名</label><input id="patient-name"
+                v-model.trim="patientModal.form.name" required></div>
+            <div class="field"><label for="patient-gender">性别</label><select id="patient-gender"
+                v-model="patientModal.form.gender">
+                <option>女</option>
+                <option>男</option>
+              </select></div>
+            <div class="field"><label for="patient-age">年龄</label><input id="patient-age"
+                v-model.number="patientModal.form.age" type="number" min="1" max="110" required></div>
+            <div class="field"><label for="patient-phone">联系电话</label><input id="patient-phone"
+                v-model.trim="patientModal.form.phone" required></div>
+            <div class="field"><label for="patient-blood">血型</label><select id="patient-blood"
+                v-model="patientModal.form.bloodType">
+                <option value="">未登记</option>
+                <option>A</option>
+                <option>B</option>
+                <option>AB</option>
+                <option>O</option>
+              </select></div>
+            <div class="field"><label for="patient-allergy">过敏史</label><input id="patient-allergy"
+                v-model.trim="patientModal.form.allergy"></div>
+            <div class="field full"><label for="patient-address">地址</label><input id="patient-address"
+                v-model.trim="patientModal.form.address"></div>
+            <div class="field full"><label for="patient-note">备注</label><textarea id="patient-note"
+                v-model.trim="patientModal.form.note"></textarea></div>
+          </div>
+        </div>
+        <div class="modal-foot"><button class="button outline" type="button"
+            @click="patientModal.show=false">取消</button><button class="button primary" type="submit"
+            :disabled="busy.patient">{{ busy.patient ? '保存中…' : '保存' }}</button></div>
+      </form>
+    </div>
+
+    <div v-if="doctorModal.show" class="mask" @click.self="doctorModal.show=false"
+      @keydown.esc="doctorModal.show=false">
+      <form class="modal" role="dialog" aria-modal="true" aria-labelledby="doctor-title" @submit.prevent="saveDoctor">
+        <div class="modal-head">
+          <div>
+            <h2 id="doctor-title">{{ doctorModal.editing ? '编辑医生' : '新增医生' }}</h2>
+            <p>配置医生公开资料与专长。</p>
+          </div><button class="modal-close" type="button" aria-label="关闭医生窗口" @click="doctorModal.show=false">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="field"><label for="doctor-name">姓名</label><input id="doctor-name"
+                v-model.trim="doctorModal.form.name" required></div>
+            <div class="field"><label for="doctor-title-field">职称</label><input id="doctor-title-field"
+                v-model.trim="doctorModal.form.title" required></div>
+            <div class="field"><label for="doctor-years">从业年限</label><input id="doctor-years"
+                v-model.number="doctorModal.form.years" type="number" min="0" required></div>
+            <div class="field"><label for="doctor-specialties">专长</label><input id="doctor-specialties"
+                v-model.trim="doctorModal.form.spec" placeholder="以英文逗号分隔" required>
+              <div class="help">多个专长请用英文逗号分隔。</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-foot"><button class="button outline" type="button"
+            @click="doctorModal.show=false">取消</button><button class="button primary" type="submit"
+            :disabled="busy.doctor">{{ busy.doctor ? '保存中…' : '保存' }}</button></div>
+      </form>
+    </div>
+
+    <div v-if="recordModal.show" class="mask" @click.self="recordModal.show=false"
+      @keydown.esc="recordModal.show=false">
+      <form class="modal wide" role="dialog" aria-modal="true" aria-labelledby="record-title"
+        @submit.prevent="saveRecord">
+        <div class="modal-head">
+          <div>
+            <h2 id="record-title">{{ recordModal.editing ? '编辑医疗记录' : '新建医疗记录' }}</h2>
+            <p>服务和牙位会按逗号格式提交给后端。</p>
+          </div><button class="modal-close" type="button" aria-label="关闭医疗记录窗口"
+            @click="recordModal.show=false">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="field"><label for="record-patient">患者</label><select id="record-patient"
+                v-model.number="recordModal.form.patientId" :disabled="recordModal.editing" required>
+                <option :value="null" disabled>请选择患者</option>
+                <option v-for="item in patients" :key="item.id" :value="item.id">{{ item.name }}</option>
+              </select></div>
+            <div class="field"><label for="record-doctor">医生</label><select id="record-doctor"
+                v-model.number="recordModal.form.doctorId" :disabled="isDoctor || recordModal.editing" required>
+                <option :value="null" disabled>请选择医生</option>
+                <option v-for="item in doctors" :key="item.id" :value="item.id">{{ item.name }}</option>
+              </select></div>
+            <div class="field full">
+              <label for="record-complaint">主诉</label>
+              <input id="record-complaint" v-model.trim="recordModal.form.complaint">
+              <div class="quick-tags">
+                <button type="button" class="tag" @click="appendTag('complaint','冷热刺激痛')">冷热刺激痛</button>
+                <button type="button" class="tag" @click="appendTag('complaint','牙龈出血')">牙龈出血</button>
+                <button type="button" class="tag" @click="appendTag('complaint','夜间剧痛')">夜间剧痛</button>
+              </div>
+            </div>
+            <div class="field full">
+              <label for="record-diagnosis">诊断</label>
+              <input id="record-diagnosis" v-model.trim="recordModal.form.diagnosis" required>
+              <div class="quick-tags">
+                <button type="button" class="tag" @click="appendTag('diagnosis','深龋')">深龋</button>
+                <button type="button" class="tag" @click="appendTag('diagnosis','急性牙髓炎')">急性牙髓炎</button>
+                <button type="button" class="tag" @click="appendTag('diagnosis','牙周病')">牙周病</button>
+              </div>
+            </div>
+            <div class="field full"><label>诊疗服务</label>
+              <div class="chips"><button v-for="service in services" :key="service.name" type="button" class="choice"
+                  :class="{on:recordModal.form.services.includes(service.name)}"
+                  :aria-pressed="recordModal.form.services.includes(service.name)"
+                  @click="toggleService(service.name)">{{ service.name }}<span v-if="service.price"> · ¥{{ service.price
+                    }}</span></button></div>
+            </div>
+            <div class="field full"><label>FDI 牙位选择</label>
+              <div class="tooth-box">
+                <div class="tooth-caption">上颌</div>
+                <div class="tooth-row"><template v-for="(row,index) in toothRows.slice(0,2)" :key="index"><span
+                      v-if="index === 1" class="tooth-gap"></span><button v-for="tooth in row" :key="tooth"
+                      type="button" class="tooth" :class="{on:recordModal.form.teeth.includes(tooth)}"
+                      :aria-pressed="recordModal.form.teeth.includes(tooth)" :aria-label="'FDI 牙位 '+tooth"
+                      @click="toggleTooth(tooth)">{{ tooth }}</button></template></div>
+                <div class="tooth-caption">下颌</div>
+                <div class="tooth-row"><template v-for="(row,index) in toothRows.slice(2)" :key="index"><span
+                      v-if="index === 1" class="tooth-gap"></span><button v-for="tooth in row" :key="tooth"
+                      type="button" class="tooth" :class="{on:recordModal.form.teeth.includes(tooth)}"
+                      :aria-pressed="recordModal.form.teeth.includes(tooth)" :aria-label="'FDI 牙位 '+tooth"
+                      @click="toggleTooth(tooth)">{{ tooth }}</button></template></div>
+                <div class="help">已选：{{ recordModal.form.teeth.length ? recordModal.form.teeth.join('、') : '无' }}</div>
+              </div>
+            </div>
+            <div class="field"><label for="record-fee">费用</label><input id="record-fee"
+                v-model.number="recordModal.form.fee" type="number" min="0" step="0.01"
+                @input="recordModal.isManual = true" required></div>
+            <div v-if="!isDoctor" class="field"><label for="record-paid">支付状态</label><select id="record-paid"
+                v-model="recordModal.form.paid">
+                <option :value="false">待支付</option>
+                <option :value="true">已支付</option>
+              </select></div>
+            <div v-else class="field"><label>支付状态</label>
+              <div class="help">医生创建的记录将按未支付状态提交。</div>
+            </div>
+            <div class="field full"><label for="record-note">医嘱或备注</label><textarea id="record-note"
+                v-model.trim="recordModal.form.note"></textarea></div>
+          </div>
+        </div>
+        <div class="modal-foot"><button class="button outline" type="button"
+            @click="recordModal.show=false">取消</button><button class="button primary" type="submit"
+            :disabled="busy.record">{{ busy.record ? '保存中…' : '保存记录' }}</button></div>
+      </form>
+    </div>
+
+    <div v-if="billModal.show" class="mask" @click.self="billModal.show=false" @keydown.esc="billModal.show=false">
+      <form class="modal" role="dialog" aria-modal="true" aria-labelledby="bill-title" @submit.prevent="saveBill">
+        <div class="modal-head">
+          <div>
+            <h2 id="bill-title">新建账单</h2>
+            <p>账单独立创建，不会同步或修改医疗记录。</p>
+          </div><button class="modal-close" type="button" aria-label="关闭账单窗口" @click="billModal.show=false">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="field"><label for="bill-patient">患者</label><select id="bill-patient"
+                v-model.number="billModal.form.patientId" required>
+                <option :value="null" disabled>请选择患者</option>
+                <option v-for="item in patients" :key="item.id" :value="item.id">{{ item.name }}</option>
+              </select></div>
+            <div class="field"><label for="bill-service">收费项目</label><input id="bill-service"
+                v-model.trim="billModal.form.service" required></div>
+            <div class="field"><label for="bill-amount">金额</label><input id="bill-amount"
+                v-model.number="billModal.form.amount" type="number" min="0.01" step="0.01" required></div>
+            <div class="field"><label for="bill-date">开单日期</label><input id="bill-date" v-model="billModal.form.date"
+                type="date" required></div>
+            <div class="field"><label for="bill-status">状态</label><select id="bill-status"
+                v-model="billModal.form.status">
+                <option>待支付</option>
+                <option>已支付</option>
+              </select></div>
+            <div class="field"><label for="bill-method">支付方式</label><select id="bill-method"
+                v-model="billModal.form.method">
+                <option value="">未收款</option>
+                <option>微信支付</option>
+                <option>支付宝</option>
+                <option>现金</option>
+                <option>银行卡</option>
+              </select></div>
+          </div>
+        </div>
+        <div class="modal-foot"><button class="button outline" type="button"
+            @click="billModal.show=false">取消</button><button class="button primary" type="submit"
+            :disabled="busy.bill">{{ busy.bill ? '保存中…' : '创建账单' }}</button></div>
+      </form>
+    </div>
+
+    <div v-if="detail.show" class="drawer-mask" @click="detail.show=false"></div>
+    <aside v-if="detail.show" class="drawer" role="dialog" aria-modal="true" aria-label="详情"
+      @keydown.esc="detail.show=false">
+      <div class="drawer-head">
+        <div class="avatar">{{ initial(detailTitle) }}</div>
+        <div><b>{{ detailTitle }}</b>
+          <div class="help">{{ detailTypeLabel }}</div>
+        </div><button class="modal-close" type="button" aria-label="关闭详情" @click="detail.show=false">×</button>
+      </div>
+      <div class="drawer-body">
+        <div class="detail-list">
+          <div v-for="row in detailRows" :key="row.label"><span>{{ row.label }}</span><b>{{ row.value }}</b></div>
+        </div>
+      </div>
+      <div class="drawer-foot"><button class="button primary" type="button" @click="printDetail">打印单据</button></div>
+    </aside>
+
+    <div v-if="confirm.show" class="mask" @click.self="resolveConfirm(false)" @keydown.esc="resolveConfirm(false)">
+      <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
+        <div class="modal-head">
+          <div>
+            <h2 id="confirm-title">{{ confirm.title }}</h2>
+            <p>{{ confirm.message }}</p>
+          </div>
+        </div>
+        <div class="modal-foot"><button class="button outline" type="button"
+            @click="resolveConfirm(false)">取消</button><button class="button danger" type="button"
+            @click="resolveConfirm(true)">{{ confirm.action }}</button></div>
+      </div>
+    </div>
+
+    <div class="toast-stack" aria-live="polite">
+      <div v-for="item in toasts" :key="item.id" class="toast" :class="item.type"><b>{{ item.title }}</b><span>{{
+          item.message }}</span></div>
+    </div>
+
+    <div v-if="auth.show" class="mask login-mask">
+      <form class="login" aria-label="登录" @submit.prevent="login">
+        <div class="login-head">
+          <div class="login-grid" aria-hidden="true"></div>
+          <div class="login-glow" aria-hidden="true"></div>
+          <div class="login-brand">
+            <span class="login-mark">齿</span>
+            <div class="login-brand-text">
+              <h1>齿悦口腔</h1>
+              <p>DENTAL CARE · 诊所管理系统</p>
+            </div>
+          </div>
+          <p class="login-tag">请使用您的诊所账号登录</p>
+        </div>
+        <div class="login-body">
+          <div v-if="auth.error" class="login-error" role="alert">{{ auth.error }}</div>
+          <div class="login-fields">
+            <div class="field login-field">
+              <label for="login-username">账号</label>
+              <div class="login-input">
+                <span class="login-ic" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+                <input id="login-username" v-model.trim="auth.form.username" autocomplete="username" placeholder="请输入账号" required>
+              </div>
+            </div>
+            <div class="field login-field">
+              <label for="login-password">密码</label>
+              <div class="login-input">
+                <span class="login-ic" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+                <input id="login-password" v-model="auth.form.password" type="password" autocomplete="current-password" placeholder="请输入密码" required>
+              </div>
+            </div>
+          </div>
+          <button class="button primary login-submit" type="submit" :disabled="auth.loading">{{ auth.loading ? '正在登录…' : '登录' }}</button>
+          <p class="login-foot">受保护入口 · 仅授权人员可访问</p>
+         
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================================
+     * 齿悦口腔管理系统 —— 前端单页应用
+     * 基于 Vue 3 全局构建版（CDN）实现，所有业务逻辑集中于 setup() 内。
+     * ========================================================================= */
+
+    const { createApp, ref, reactive, computed, watch, onMounted, nextTick } = Vue;
+
+    /* --- 全局常量配置 --- */
+    const API_PREFIX = '/api';
+    const TOKEN_KEY = 'dental.session.token';
+    const USER_KEY = 'dental.session.user';
+    const PAGE_SIZE = 10; // 前端假分页每页条数
+
+    /* --- 诊疗服务价目表（同时作为病历弹窗的服务选项与费用核算基准） --- */
+    const services = [
+      { name: '口腔检查', price: 100 }, { name: '超声波洁牙', price: 280 },
+      { name: '补牙（树脂）', price: 350 }, { name: '根管治疗', price: 800 },
+      { name: '拔牙', price: 300 }, { name: '种植牙', price: 8000 },
+      { name: '正畸（矫牙）', price: 15000 }, { name: '全瓷冠修复', price: 1200 }
+    ];
+
+    /* --- ECharts 配色 --- */
+    const chartPalette = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#4a3aa7', '#e34948'];
+
+    /* --- 通用工具函数 --- */
+    const fmtDate = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const today = () => fmtDate(new Date());
+    const listify = value => Array.isArray(value) ? value.filter(Boolean) : String(value || '').split(',').map(value => value.trim()).filter(Boolean);
+    const normalizePatient = value => ({ ...value, id: Number(value.id), age: Number(value.age || 0) });
+    const normalizeDoctor = value => ({ ...value, id: Number(value.id), years: Number(value.years || 0), work: Number(value.work || 0), spec: listify(value.spec) });
+    const normalizeAppointment = value => ({ ...value, id: Number(value.id), patientId: Number(value.patientId), doctorId: Number(value.doctorId), date: String(value.date || '').slice(0, 10) });
+    const normalizeRecord = value => ({ ...value, id: Number(value.id), patientId: Number(value.patientId), doctorId: Number(value.doctorId), services: listify(value.services), teeth: listify(value.teeth).map(Number).filter(Number.isFinite), fee: Number(value.fee || 0), paid: value.paid === true || value.paid === 'true', date: String(value.date || '').slice(0, 10) });
+    const normalizeBill = value => ({ ...value, id: Number(value.id), patientId: Number(value.patientId), amount: Number(value.amount || 0), date: String(value.date || '').slice(0, 10) });
+
+    /* =========================================================================
+     * 网络请求层
+     * 统一封装 fetch：自动携带 Token、解析 JSON、处理鉴权过期与错误透传。
+     * 注意：请求路径与请求体结构保持与后端 Spring Boot 接口一致，禁止改动。
+     * ========================================================================= */
+    async function request(url, options = {}) {
+      const token = sessionStorage.getItem(TOKEN_KEY) || '';
+      const headers = {
+        Accept: 'application/json',
+        ...(options.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers || {})
+      };
+      let response;
+      try {
+        response = await fetch(`${API_PREFIX}${url.startsWith('/') ? url : `/${url}`}`, { ...options, headers });
+      } catch (error) {
+        const network = new Error('无法连接后端服务。');
+        network.kind = 'network';
+        throw network;
+      }
+      const text = await response.text();
+      let body = null;
+      if (text) {
+        try { body = JSON.parse(text); } catch (error) { if (response.ok) throw new Error('接口返回了无法识别的数据。'); }
+      }
+      if (!response.ok) {
+        if (response.status === 401) window.dispatchEvent(new Event('dental-auth-expired'));
+        const failure = new Error((body && (body.message || body.error || body.msg)) || `请求失败（HTTP ${response.status}）`);
+        failure.status = response.status;
+        failure.body = body;
+        throw failure;
+      }
+      return body;
+    }
+
+    /* --- 请求体序列化助手 --- */
+    const json = body => JSON.stringify(body);
+
+    /* --- 内联 SVG 矢量图标（精简 Lucide 风格，通过 stroke=currentColor 继承导航颜色） --- */
+    const svg = inner => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+    const ICONS = {
+      dashboard: svg('<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>'),
+      appointments: svg('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'),
+      patients: svg('<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'),
+      records: svg('<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>'),
+      doctors: svg('<path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.3.3 0 1 0 .2.3"/><path d="M8 15v1a4 4 0 0 0 8 0v3a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-3"/>'),
+      billing: svg('<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/>'),
+      settings: svg('<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>')
+    };
+
+    createApp({
+      setup() {
+         //1、状态管理
+         //集中声明全部响应式数据：业务数据集合、登录态、视图状态、弹窗与抽屉
+        const data = reactive({ summary: {}, patients: [], doctors: [], appointments: [], records: [], bills: [] });
+        const currentUser = ref(null);
+        const auth = reactive({ show: true, loading: false, error: '', form: { username: '', password: '' } });
+        const quickUsernames = ['admin', 'doctor1', 'doctor2', 'staff1'];
+        const view = ref('dashboard'), mobileOpen = ref(false), initialLoading = ref(true), loading = ref(false), loadError = ref('');
+        const busy = reactive({ appointment: false, patient: false, doctor: false, record: false, bill: false, users: false });
+        const users = ref([]), toasts = ref([]),
+          appointmentFilter = ref('all'), appointmentSearch = ref(''),
+          patientSearch = ref(''),
+          recordFilter = ref('all'), recordSearch = ref(''),
+          billFilter = ref('all');
+        /* 前端假分页页码（搜索/过滤变化时由 watcher 重置为 1） */
+        const pages = reactive({ appointments: 1, patients: 1, records: 1, bills: 1 });
+
+        /* --- 弹窗状态 --- */
+        const appointmentModal = reactive({ show: false, editing: false, original: null, form: {} });
+        const patientModal = reactive({ show: false, editing: false, form: {} });
+        const doctorModal = reactive({ show: false, editing: false, form: {} });
+        const recordModal = reactive({ show: false, editing: false, isManual: false, form: {} });
+        const billModal = reactive({ show: false, form: {} });
+
+        /* --- 号源时段、详情抽屉、确认弹窗 --- */
+        const slots = reactive({ items: [], loading: false, error: '', sequence: 0 });
+        const detail = reactive({ show: false, type: '', item: null });
+        const confirm = reactive({ show: false, title: '', message: '', action: '确认', resolve: null });
+
+        let toastId = 0, charts = {};
+
+        /* --- 权限与角色 --- */
+        const can = roles => Boolean(currentUser.value && roles.includes(currentUser.value.role));
+        const isDoctor = computed(() => can(['DOCTOR']));
+        const roleLabel = role => ({ ADMIN: '管理员', DOCTOR: '医生', STAFF: '前台人员' })[role] || role || '—';
+
+        /* --- 导航分组（图标已替换为内联 SVG） --- */
+        const navGroups = [
+          { label: '概览', items: [{ key: 'dashboard', label: '仪表盘', icon: ICONS.dashboard, roles: ['ADMIN', 'DOCTOR', 'STAFF'] }] },
+          {
+            label: '诊疗管理', items: [
+              { key: 'appointments', label: '预约中心', icon: ICONS.appointments, roles: ['ADMIN', 'DOCTOR', 'STAFF'] },
+              { key: 'patients', label: '患者档案', icon: ICONS.patients, roles: ['ADMIN', 'DOCTOR', 'STAFF'] },
+              { key: 'records', label: '电子病历', icon: ICONS.records, roles: ['ADMIN', 'DOCTOR', 'STAFF'] },
+              { key: 'doctors', label: '医生管理', icon: ICONS.doctors, roles: ['ADMIN', 'DOCTOR', 'STAFF'] }
+            ]
+          },
+          {
+            label: '运营', items: [
+              { key: 'billing', label: '收费结算', icon: ICONS.billing, roles: ['ADMIN', 'STAFF'] },
+              { key: 'settings', label: '系统设置', icon: ICONS.settings, roles: ['ADMIN'] }
+            ]
+          }
+        ];
+        const visibleNavGroups = computed(() => navGroups.map(group => ({ ...group, items: group.items.filter(item => can(item.roles)) })).filter(group => group.items.length));
+        const visibleKeys = computed(() => visibleNavGroups.value.flatMap(group => group.items.map(item => item.key)));
+
+        /* --- 页面标题 --- */
+        const pageInfo = { dashboard: ['仪表盘', '今日诊所运营概览'], appointments: ['预约中心', '预约排期与就诊处理'], patients: ['患者档案', '患者档案管理'], records: ['电子病历', '诊疗记录管理'], doctors: ['医生管理', '医生资料与专长'], billing: ['收费结算', '收费账单管理'], settings: ['系统设置', '账号状态管理'] };
+        const pageTitle = computed(() => (pageInfo[view.value] || pageInfo.dashboard)[0]);
+        const pageSub = computed(() => (pageInfo[view.value] || pageInfo.dashboard)[1]);
+
+        const summary = computed(() => data.summary || {});
+
+        /* --- 通用格式化 --- */
+        const money = value => Number(value || 0).toLocaleString('zh-CN', { maximumFractionDigits: 2 });
+        const initial = value => String(value || '—').slice(0, 1);
+
+        /* --- 名称查找助手 --- */
+        const patient = id => data.patients.find(item => Number(item.id) === Number(id));
+        const doctor = id => data.doctors.find(item => Number(item.id) === Number(id));
+        const patientName = id => (patient(id) || {}).name || '未知患者';
+        const patientPhone = id => (patient(id) || {}).phone || '—';
+        const doctorName = id => (doctor(id) || {}).name || '未知医生';
+
+        /* --- 状态样式映射 --- */
+        const appointmentClass = status => ({ '待就诊': 'pending', '已完成': 'done', '已取消': 'cancelled' })[status] || 'cancelled';
+        const billClass = status => ({ '待支付': 'pending', '已支付': 'paid', '已退款': 'refunded' })[status] || 'cancelled';
+
+        /* --- 轻提示与确认弹窗 --- */
+        const toast = (title, message = '', type = 'success') => {
+          const id = ++toastId;
+          toasts.value.push({ id, title, message, type });
+          setTimeout(() => { toasts.value = toasts.value.filter(item => item.id !== id); }, 3200);
+        };
+        const ask = (title, message, action = '确认') => new Promise(resolve => { Object.assign(confirm, { show: true, title, message, action, resolve }); });
+        const resolveConfirm = answer => { const resolve = confirm.resolve; confirm.show = false; confirm.resolve = null; if (resolve) resolve(answer); };
+
+        /* --- 数组整体替换助手（保持响应式引用） --- */
+        const replace = (key, items) => data[key].splice(0, data[key].length, ...items);
+
+        /* --- 各资源加载器配置（路径与归一化函数，禁止改动路径） --- */
+        const loaders = {
+          summary: ['/dashboard/summary', value => { data.summary = value || {}; }],
+          patients: ['/patients', value => replace('patients', (Array.isArray(value) ? value : []).map(normalizePatient))],
+          doctors: ['/doctors', value => replace('doctors', (Array.isArray(value) ? value : []).map(normalizeDoctor))],
+          appointments: ['/appointments', value => replace('appointments', (Array.isArray(value) ? value : []).map(normalizeAppointment))],
+          records: ['/records', value => replace('records', (Array.isArray(value) ? value : []).map(normalizeRecord))],
+          bills: ['/bills', value => replace('bills', (Array.isArray(value) ? value : []).map(normalizeBill))]
+        };
+        const load = async key => { const [url, apply] = loaders[key]; apply(await request(url)); };
+
+        const permittedResources = () => ['summary', 'patients', 'doctors', 'appointments', 'records', ...(can(['ADMIN', 'STAFF']) ? ['bills'] : [])];
+
+        /* --- 批量加载全部资源 --- */
+        const loadAll = async announce => {
+          loading.value = true;
+          loadError.value = '';
+          const results = await Promise.allSettled(permittedResources().map(load));
+          const failures = results.filter(result => result.status === 'rejected');
+          if (failures.length) {
+            loadError.value = failures.map(result => result.reason.message).join('；');
+            if (announce) toast('数据加载失败', loadError.value, 'error');
+          } else if (announce) toast('数据已刷新', '已获取当前后端数据。', 'info');
+          initialLoading.value = false;
+          loading.value = false;
+          return !failures.length;
+        };
+
+        /* --- 局部刷新指定资源 --- */
+        const refresh = async keys => {
+          const results = await Promise.allSettled(keys.filter(key => loaders[key]).map(load));
+          const failed = results.find(result => result.status === 'rejected');
+          if (failed) toast('刷新失败', failed.reason.message, 'error');
+          return !failed;
+        };
+
+        /* --- 导航跳转 --- */
+        const goto = key => {
+          if (!visibleKeys.value.includes(key)) { toast('无权访问', '当前账号无权打开该模块。', 'error'); return; }
+          view.value = key;
+          mobileOpen.value = false;
+          if (key === 'settings') loadUsers();
+        };
+        const reloadCurrent = async () => { await loadAll(true); await nextTick(renderCharts); };
+
+        /* --- 会话与登录 --- */
+        const clearSession = () => {
+          sessionStorage.removeItem(TOKEN_KEY);
+          sessionStorage.removeItem(USER_KEY);
+          currentUser.value = null;
+          auth.form.password = '';
+          auth.show = true;
+        };
+        const fillUsername = username => { auth.form.username = username; auth.form.password = ''; auth.error = ''; };
+        const login = async () => {
+          if (auth.loading) return;
+          auth.error = '';
+          if (!auth.form.username || !auth.form.password) { auth.error = '请填写账号和登录凭证。'; return; }
+          auth.loading = true;
+          try {
+            const result = await request('/auth/login', { method: 'POST', body: json({ username: auth.form.username, password: auth.form.password }) });
+            if (!result || !result.token || !result.user) throw new Error('登录响应不完整。');
+            sessionStorage.setItem(TOKEN_KEY, result.token);
+            sessionStorage.setItem(USER_KEY, JSON.stringify(result.user));
+            currentUser.value = result.user;
+            auth.form.password = '';
+            auth.show = false;
+            view.value = visibleKeys.value.includes('dashboard') ? 'dashboard' : visibleKeys.value[0];
+            await loadAll(false);
+            await nextTick(renderCharts);
+          } catch (error) {
+            auth.error = error.message || '登录失败。';
+          } finally {
+            auth.loading = false;
+          }
+        };
+        const logout = () => {
+          clearSession();
+          Object.assign(data, { summary: {} });
+          replace('patients', []); replace('doctors', []); replace('appointments', []); replace('records', []); replace('bills', []);
+          users.value = [];
+        };
+        const restoreSession = async () => {
+          if (!sessionStorage.getItem(TOKEN_KEY)) return false;
+          try {
+            currentUser.value = await request('/auth/me');
+            auth.show = false;
+            return true;
+          } catch (error) {
+            clearSession();
+            return false;
+          }
+        };
+
+        /* --- 仪表盘派生数据 --- */
+        const todayPending = computed(() => data.appointments.filter(item => item.date === today() && item.status === '待就诊'));
+        const recentAppointments = computed(() => [...data.appointments].sort((a, b) => Number(b.id) - Number(a.id)).slice(0, 6));
+        const trendData = computed(() => Array.from({ length: 7 }, (_, index) => {
+          const date = new Date();
+          date.setDate(date.getDate() - 6 + index);
+          const iso = fmtDate(date);
+          return { date: iso, label: iso.slice(5), value: data.appointments.filter(item => item.date === iso).length };
+        }));
+        const serviceData = computed(() => {
+          const counts = {};
+          data.records.forEach(record => record.services.forEach(service => { counts[service] = (counts[service] || 0) + 1; }));
+          return services.map((service, index) => ({ name: service.name, value: counts[service.name] || 0, color: chartPalette[index] })).filter(item => item.value > 0).sort((a, b) => b.value - a.value);
+        });
+
+        //2、ECharts 渲染
+        //折线趋势图与诊疗服务水平条形图。
+        const renderCharts = () => {
+          if (view.value !== 'dashboard' || !window.echarts) return;
+          Object.values(charts).forEach(chart => chart.dispose());
+          charts = {};
+          const trend = document.getElementById('appointment-trend');
+          const distribution = document.getElementById('service-distribution');
+          if (trend) {
+            charts.trend = echarts.init(trend);
+            charts.trend.setOption({
+              aria: { enabled: true, description: '近七日每日预约数量趋势。' },
+              tooltip: { trigger: 'axis', axisPointer: { type: 'line' }, backgroundColor: '#183b39', borderWidth: 0, textStyle: { color: '#fff' } },
+              grid: { left: 40, right: 18, top: 22, bottom: 28 },
+              xAxis: { type: 'category', data: trendData.value.map(item => item.label), axisTick: { show: false }, axisLine: { lineStyle: { color: '#cfe2dd' } }, axisLabel: { color: '#68817d' } },
+              yAxis: { type: 'value', minInterval: 1, axisLabel: { color: '#68817d' }, splitLine: { lineStyle: { color: '#eef5f3' } } },
+              series: [{ name: '预约数量', type: 'line', data: trendData.value.map(item => item.value), symbol: 'circle', symbolSize: 8, lineStyle: { color: '#2a78d6', width: 2 }, itemStyle: { color: '#fff', borderColor: '#2a78d6', borderWidth: 2 } }]
+            });
+          }
+          if (distribution) {
+            const values = serviceData.value;
+            charts.distribution = echarts.init(distribution);
+            charts.distribution.setOption({
+              aria: { enabled: true, description: '按诊疗服务分类的次数分布。' },
+              tooltip: { trigger: 'item', formatter: '{b}：{c} 次', backgroundColor: '#183b39', borderWidth: 0, textStyle: { color: '#fff' } },
+              grid: { left: 95, right: 52, top: 14, bottom: 15 },
+              xAxis: { type: 'value', minInterval: 1, axisLabel: { color: '#68817d' }, splitLine: { lineStyle: { color: '#eef5f3' } } },
+              yAxis: { type: 'category', data: values.map(item => item.name), inverse: true, axisTick: { show: false }, axisLine: { show: false }, axisLabel: { color: '#405b57' } },
+              series: [{ type: 'bar', data: values.map(item => ({ value: item.value, itemStyle: { color: item.color, borderColor: '#fff', borderWidth: 2, borderRadius: [0, 4, 4, 0] } })), barMaxWidth: 24, barCategoryGap: '35%', label: { show: true, position: 'right', color: '#405b57', formatter: '{c} 次' } }]
+            });
+          }
+        };
+        const resizeCharts = () => Object.values(charts).forEach(chart => chart.resize());
+
+         //3、预约管理
+        const appointmentTabs = [{ key: 'all', label: '全部' }, { key: 'pending', label: '待就诊' }, { key: 'done', label: '已完成' }, { key: 'cancelled', label: '已取消' }];
+
+        /* 全量过滤结果（用于计数与假分页切片） */
+        const filteredAppointments = computed(() => data.appointments.filter(item => {
+          const statusOk = appointmentFilter.value === 'all' || ({ pending: '待就诊', done: '已完成', cancelled: '已取消' })[appointmentFilter.value] === item.status;
+          const q = appointmentSearch.value;
+          const queryOk = !q || patientName(item.patientId).includes(q) || String(item.code || '').includes(q) || String(item.date || '').includes(q);
+          return statusOk && queryOk;
+        }).sort((a, b) => Number(b.id) - Number(a.id)));
+
+        /* 假分页：当前页数与当前页数据 */
+        const appointmentPageCount = computed(() => Math.max(1, Math.ceil(filteredAppointments.value.length / PAGE_SIZE)));
+        const pagedAppointments = computed(() => filteredAppointments.value.slice((pages.appointments - 1) * PAGE_SIZE, pages.appointments * PAGE_SIZE));
+
+        const emptyAppointment = () => ({ patientId: null, doctorId: isDoctor.value ? currentUser.value.doctorId : null, type: services[0].name, date: today(), time: '', visitType: '初诊', note: '' });
+        const closeAppointment = () => { appointmentModal.show = false; slots.sequence++; slots.items = []; slots.loading = false; slots.error = ''; };
+        const openAppointment = (item = null, selectedDoctor = null) => {
+          appointmentModal.editing = Boolean(item);
+          appointmentModal.original = item ? { doctorId: Number(item.doctorId), date: item.date, time: item.time } : null;
+          appointmentModal.form = item
+            ? { ...item, doctorId: isDoctor.value ? currentUser.value.doctorId : Number(item.doctorId), patientId: Number(item.patientId) }
+            : { ...emptyAppointment(), doctorId: selectedDoctor ? selectedDoctor.id : (isDoctor.value ? currentUser.value.doctorId : null) };
+          appointmentModal.show = true;
+          slots.items = [];
+          slots.error = '';
+          nextTick(loadSlots);
+        };
+        const exactOriginal = () => { const original = appointmentModal.original, form = appointmentModal.form; return Boolean(original && Number(original.doctorId) === Number(form.doctorId) && original.date === form.date); };
+        const slotSelectable = slot => Boolean(slot && (slot.current || (slot.available && Number(slot.remainingQuota) > 0)));
+        const selectedSlotAvailable = computed(() => slots.items.some(slot => slot.timeSlot === appointmentModal.form.time && slotSelectable(slot)));
+        const loadSlots = async () => {
+          const doctorId = appointmentModal.form.doctorId, date = appointmentModal.form.date, sequence = ++slots.sequence;
+          slots.items = []; slots.error = '';
+          if (!appointmentModal.show || !doctorId || !date) { slots.loading = false; appointmentModal.form.time = ''; return; }
+          slots.loading = true;
+          try {
+            const reply = await request(`/doctors/${doctorId}/slots?date=${encodeURIComponent(date)}`);
+            if (sequence !== slots.sequence) return;
+            const items = Array.isArray(reply) ? reply.map(slot => ({ ...slot, remainingQuota: Number(slot.remainingQuota || 0), available: Boolean(slot.available) })) : [];
+            if (exactOriginal()) {
+              const own = items.find(slot => slot.timeSlot === appointmentModal.original.time);
+              if (own) { own.current = true; own.available = true; own.remainingQuota = Math.max(1, own.remainingQuota); }
+            }
+            slots.items = items;
+            const currentValid = items.some(slot => slot.timeSlot === appointmentModal.form.time && slotSelectable(slot));
+            if (!currentValid) appointmentModal.form.time = '';
+          } catch (error) {
+            if (sequence !== slots.sequence) return;
+            slots.error = error.message || '号源加载失败。';
+            appointmentModal.form.time = '';
+          } finally {
+            if (sequence === slots.sequence) slots.loading = false;
+          }
+        };
+        watch(() => [appointmentModal.form.doctorId, appointmentModal.form.date], (next, previous) => {
+          if (!appointmentModal.show) return;
+          const changed = previous && (Number(next[0]) !== Number(previous[0]) || next[1] !== previous[1]);
+          if (changed && !exactOriginal()) appointmentModal.form.time = '';
+          loadSlots();
+        });
+
+        const saveAppointment = async () => {
+          const form = appointmentModal.form;
+          if (busy.appointment) return;
+          if (!form.patientId || !form.doctorId || !form.date || !selectedSlotAvailable.value) { toast('无法保存预约', '请选择患者、医生、日期和可用时段。', 'error'); return; }
+          busy.appointment = true;
+          const payload = { patientId: form.patientId, doctorId: form.doctorId, type: form.type, date: form.date, time: form.time, visitType: form.visitType, note: form.note };
+          try {
+            if (appointmentModal.editing) await request(`/appointments/${form.id}`, { method: 'PUT', body: json(payload) });
+            else await request('/appointments', { method: 'POST', body: json({ ...payload, status: '待就诊' }) });
+            await refresh(['appointments', 'summary']);
+            closeAppointment();
+            toast('预约已保存', `${form.date} ${form.time}`);
+          } catch (error) {
+            if (error.status === 409) { await Promise.allSettled([loadSlots(), refresh(['appointments'])]); toast('时段已更新', '该时段已不可用，请重新选择。', 'error'); }
+            else toast('预约保存失败', error.message, 'error');
+          } finally {
+            busy.appointment = false;
+          }
+        };
+        const completeAppointment = async item => {
+          if (!(await ask('完成就诊', `确认完成 ${patientName(item.patientId)} 的预约？`, '完成'))) return;
+          busy.appointment = true;
+          try { await request(`/appointments/${item.id}/complete`, { method: 'POST' }); await refresh(['appointments', 'summary']); toast('已完成就诊'); }
+          catch (error) { toast('操作失败', error.message, 'error'); }
+          finally { busy.appointment = false; }
+        };
+        const cancelAppointment = async item => {
+          if (!(await ask('取消预约', `确认取消 ${patientName(item.patientId)} 的预约？`, '取消预约'))) return;
+          busy.appointment = true;
+          try { await request(`/appointments/${item.id}/cancel`, { method: 'POST' }); await refresh(['appointments', 'summary']); toast('预约已取消'); }
+          catch (error) { toast('操作失败', error.message, 'error'); }
+          finally { busy.appointment = false; }
+        };
+        const deleteAppointment = async item => {
+          if (!(await ask('删除预约', `确认删除 ${patientName(item.patientId)} 的预约记录？`, '删除'))) return;
+          busy.appointment = true;
+          try { await request(`/appointments/${item.id}`, { method: 'DELETE' }); await refresh(['appointments', 'summary']); toast('预约已删除'); }
+          catch (error) { toast('删除失败', error.message, 'error'); }
+          finally { busy.appointment = false; }
+        };
+
+        //4、患者管理
+        const filteredPatients = computed(() => data.patients.filter(item => !patientSearch.value || item.name.includes(patientSearch.value) || String(item.phone || '').includes(patientSearch.value)));
+        const patientPageCount = computed(() => Math.max(1, Math.ceil(filteredPatients.value.length / PAGE_SIZE)));
+        const pagedPatients = computed(() => filteredPatients.value.slice((pages.patients - 1) * PAGE_SIZE, pages.patients * PAGE_SIZE));
+
+        const emptyPatient = () => ({ name: '', gender: '女', age: null, phone: '', bloodType: '', allergy: '', address: '', note: '' });
+        const openPatient = item => { patientModal.editing = Boolean(item); patientModal.form = item ? { ...item } : emptyPatient(); patientModal.show = true; };
+        const savePatient = async () => {
+          const form = patientModal.form;
+          if (!form.name || !form.phone || !form.age) { toast('请完善患者信息', '姓名、年龄和联系电话为必填项。', 'error'); return; }
+          busy.patient = true;
+          const payload = { name: form.name, gender: form.gender, age: Number(form.age), phone: form.phone, bloodType: form.bloodType, allergy: form.allergy, address: form.address, note: form.note };
+          try {
+            if (patientModal.editing) await request(`/patients/${form.id}`, { method: 'PUT', body: json(payload) });
+            else await request('/patients', { method: 'POST', body: json(payload) });
+            await refresh(['patients', 'summary']);
+            patientModal.show = false;
+            toast('患者档案已保存', form.name);
+          } catch (error) {
+            toast('保存失败', error.message, 'error');
+          } finally {
+            busy.patient = false;
+          }
+        };
+        const deletePatient = async item => {
+          if (!(await ask('删除患者', `确认删除患者 ${item.name}？`, '删除'))) return;
+          try { await request(`/patients/${item.id}`, { method: 'DELETE' }); await refresh(['patients', 'summary']); toast('患者已删除', item.name); }
+          catch (error) { toast('删除失败', error.message, 'error'); }
+        };
+
+        //5、医生管理
+        const openDoctor = item => { doctorModal.editing = Boolean(item); doctorModal.form = item ? { ...item, spec: item.spec.join(',') } : { name: '', title: '', years: 0, spec: '' }; doctorModal.show = true; };
+        const saveDoctor = async () => {
+          const form = doctorModal.form;
+          if (!form.name || !form.title || form.years === null || !form.spec) { toast('请完善医生信息', '', 'error'); return; }
+          busy.doctor = true;
+          const payload = { name: form.name, title: form.title, years: Number(form.years), spec: listify(form.spec).join(',') };
+          try {
+            if (doctorModal.editing) await request(`/doctors/${form.id}`, { method: 'PUT', body: json(payload) });
+            else await request('/doctors', { method: 'POST', body: json(payload) });
+            await refresh(['doctors']);
+            doctorModal.show = false;
+            toast('医生资料已保存', form.name);
+          } catch (error) {
+            toast('保存失败', error.message, 'error');
+          } finally {
+            busy.doctor = false;
+          }
+        };
+        const deleteDoctor = async item => {
+          if (!(await ask('删除医生', `确认删除医生 ${item.name}？`, '删除'))) return;
+          try { await request(`/doctors/${item.id}`, { method: 'DELETE' }); await refresh(['doctors']); toast('医生已删除', item.name); }
+          catch (error) { toast('删除失败', error.message, 'error'); }
+        };
+
+         //6、医疗记录管理（含快捷标签与费用智能联动）
+        const recordTabs = [{ key: 'all', label: '全部' }, { key: 'month', label: '本月' }, { key: 'unpaid', label: '待支付' }];
+        const filteredRecords = computed(() => data.records.filter(item => {
+          const statusOk = recordFilter.value === 'all' || (recordFilter.value === 'month' && item.date.slice(0, 7) === today().slice(0, 7)) || (recordFilter.value === 'unpaid' && !item.paid);
+          const q = recordSearch.value;
+          return statusOk && (!q || patientName(item.patientId).includes(q) || String(item.code || '').includes(q) || String(item.diagnosis || '').includes(q));
+        }).sort((a, b) => String(b.date).localeCompare(String(a.date))));
+        const recordPageCount = computed(() => Math.max(1, Math.ceil(filteredRecords.value.length / PAGE_SIZE)));
+        const pagedRecords = computed(() => filteredRecords.value.slice((pages.records - 1) * PAGE_SIZE, pages.records * PAGE_SIZE));
+
+        /* FDI 牙位象限布局 */
+        const toothRows = [[18, 17, 16, 15, 14, 13, 12, 11], [21, 22, 23, 24, 25, 26, 27, 28], [48, 47, 46, 45, 44, 43, 42, 41], [31, 32, 33, 34, 35, 36, 37, 38]];
+
+        const emptyRecord = () => ({ patientId: null, doctorId: isDoctor.value ? currentUser.value.doctorId : null, complaint: '', diagnosis: '', services: [], teeth: [], fee: 0, date: today(), paid: false, note: '' });
+        const openRecord = item => {
+          recordModal.editing = Boolean(item);
+          recordModal.isManual = Boolean(item); // 编辑模式下默认不自动算钱
+          recordModal.form = item ? { ...item, services: [...item.services], teeth: [...item.teeth] } : emptyRecord();
+          recordModal.show = true;
+        };
+
+        /* 快捷标签：将文案追加到主诉/诊断输入框（重复点击不会重复追加） */
+        const appendTag = (field, text) => {
+          const form = recordModal.form;
+          const current = (form[field] || '').trim();
+          if (!current) form[field] = text;
+          else if (current.includes(text)) return;
+          else form[field] = current + '、' + text;
+        };
+
+        /* 费用智能联动：按已勾选服务累加价目，保留医生手动修改的权限 */
+        const recalcRecordFee = () => {
+          if (recordModal.isManual) return;
+          recordModal.form.fee = recordModal.form.services.reduce((sum, name) => {
+            const match = services.find(item => item.name === name);
+            return sum + (match ? match.price : 0);
+          }, 0);
+        };
+        const toggleService = service => {
+          const items = recordModal.form.services, index = items.indexOf(service);
+          if (index >= 0) items.splice(index, 1);
+          else items.push(service);
+          recalcRecordFee();
+        };
+        const toggleTooth = tooth => { const items = recordModal.form.teeth, index = items.indexOf(tooth); if (index >= 0) items.splice(index, 1); else items.push(tooth); };
+
+        const saveRecord = async () => {
+          const form = recordModal.form;
+          if (!form.patientId || !form.doctorId || !form.diagnosis || !form.services.length) { toast('请完善医疗记录', '患者、医生、诊断和至少一项服务为必填。', 'error'); return; }
+          busy.record = true;
+          const payload = {
+            patientId: form.patientId, doctorId: form.doctorId, complaint: form.complaint, diagnosis: form.diagnosis,
+            services: listify(form.services).join(','), teeth: form.teeth.join(','), fee: Number(form.fee || 0),
+            date: form.date || today(), paid: isDoctor.value ? false : Boolean(form.paid), note: form.note,
+            ...(recordModal.editing && form.code ? { code: form.code } : {})
+          };
+          try {
+            if (recordModal.editing) await request(`/records/${form.id}`, { method: 'PUT', body: json(payload) });
+            else await request('/records', { method: 'POST', body: json(payload) });
+            await refresh(['records', 'summary']);
+            recordModal.show = false;
+            toast('医疗记录已保存');
+          } catch (error) {
+            toast('保存失败', error.message, 'error');
+          } finally {
+            busy.record = false;
+          }
+        };
+        const deleteRecord = async item => {
+          if (!(await ask('删除医疗记录', `确认删除记录 ${item.code || item.id}？`, '删除'))) return;
+          try { await request(`/records/${item.id}`, { method: 'DELETE' }); await refresh(['records', 'summary']); toast('医疗记录已删除'); }
+          catch (error) { toast('删除失败', error.message, 'error'); }
+        };
+
+        //7、账单管理
+        const billTabs = [{ key: 'all', label: '全部' }, { key: 'paid', label: '已支付' }, { key: 'unpaid', label: '待支付' }, { key: 'refunded', label: '已退款' }];
+        const filteredBills = computed(() => data.bills.filter(item => billFilter.value === 'all' || ({ paid: '已支付', unpaid: '待支付', refunded: '已退款' })[billFilter.value] === item.status));
+        const billPageCount = computed(() => Math.max(1, Math.ceil(filteredBills.value.length / PAGE_SIZE)));
+        const pagedBills = computed(() => filteredBills.value.slice((pages.bills - 1) * PAGE_SIZE, pages.bills * PAGE_SIZE));
+
+        const openBill = () => { billModal.form = { patientId: null, service: '', amount: 0, method: '', date: today(), status: '待支付' }; billModal.show = true; };
+        const saveBill = async () => {
+          const form = billModal.form;
+          if (!form.patientId || !form.service || Number(form.amount) <= 0) { toast('请完善账单信息', '', 'error'); return; }
+          busy.bill = true;
+          try {
+            await request('/bills', { method: 'POST', body: json({ patientId: form.patientId, service: form.service, amount: Number(form.amount), method: form.method, date: form.date, status: form.status }) });
+            await refresh(['bills', 'summary']);
+            billModal.show = false;
+            toast('账单已创建');
+          } catch (error) {
+            toast('创建失败', error.message, 'error');
+          } finally {
+            busy.bill = false;
+          }
+        };
+        const payBill = async item => {
+          if (!(await ask('确认收款', `确认收到 ${patientName(item.patientId)} 的 ¥${money(item.amount)}？`, '确认收款'))) return;
+          busy.bill = true;
+          try { await request(`/bills/${item.id}/pay`, { method: 'POST', body: json({ method: '微信支付' }) }); await refresh(['bills', 'summary']); toast('已确认收款'); }
+          catch (error) { toast('收款失败', error.message, 'error'); }
+          finally { busy.bill = false; }
+        };
+        const refundBill = async item => {
+          if (!(await ask('办理退款', `确认退款 ¥${money(item.amount)}？`, '退款'))) return;
+          busy.bill = true;
+          try { await request(`/bills/${item.id}/refund`, { method: 'POST' }); await refresh(['bills', 'summary']); toast('退款已完成'); }
+          catch (error) { toast('退款失败', error.message, 'error'); }
+          finally { busy.bill = false; }
+        };
+
+         //8、账号管理（设置页）
+        const loadUsers = async () => {
+          if (!can(['ADMIN'])) return;
+          busy.users = true;
+          try { const result = await request('/users'); users.value = Array.isArray(result) ? result : []; }
+          catch (error) { toast('账号加载失败', error.message, 'error'); }
+          finally { busy.users = false; }
+        };
+        const toggleUserStatus = async item => {
+          const status = item.status === 1 ? 0 : 1;
+          busy.users = true;
+          try { await request(`/users/${item.id}/status`, { method: 'PUT', body: json({ status }) }); await loadUsers(); toast(status === 1 ? '账号已启用' : '账号已停用', item.realName); }
+          catch (error) { toast('账号状态更新失败', error.message, 'error'); }
+          finally { busy.users = false; }
+        };
+
+        const recordCountForDoctor = id => data.records.filter(item => Number(item.doctorId) === Number(id) && item.date.slice(0, 7) === today().slice(0, 7)).length;
+
+        //9、详情与打印
+        const openDetail = (type, item) => { detail.type = type; detail.item = item; detail.show = true; };
+        const detailTitle = computed(() => {
+          const item = detail.item || {};
+          if (detail.type === 'patient') return item.name || '患者详情';
+          if (detail.type === 'doctor') return item.name || '医生详情';
+          if (detail.type === 'appointment') return item.code || '预约详情';
+          if (detail.type === 'record') return item.code || '医疗记录详情';
+          if (detail.type === 'bill') return item.code || '账单详情';
+          return '详情';
+        });
+        const detailTypeLabel = computed(() => ({ patient: '患者档案', doctor: '医生资料', appointment: '预约', record: '医疗记录', bill: '账单' })[detail.type] || '详情');
+        const detailRows = computed(() => {
+          const item = detail.item || {};
+          const maps = {
+            patient: [['姓名', item.name], ['性别', item.gender], ['年龄', item.age], ['联系电话', item.phone], ['血型', item.bloodType], ['过敏史', item.allergy || '无'], ['地址', item.address || '—'], ['备注', item.note || '—']],
+            doctor: [['姓名', item.name], ['职称', item.title], ['从业年限', `${item.years || 0} 年`], ['专长', (item.spec || []).join('、') || '—']],
+            appointment: [['患者', patientName(item.patientId)], ['医生', doctorName(item.doctorId)], ['项目', item.type], ['日期', item.date], ['时段', item.time], ['状态', item.status], ['就诊类型', item.visitType], ['备注', item.note || '—']],
+            record: [['患者', patientName(item.patientId)], ['医生', doctorName(item.doctorId)], ['主诉', item.complaint || '—'], ['诊断', item.diagnosis || '—'], ['服务', (item.services || []).join('、')], ['牙位', (item.teeth || []).join('、') || '—'], ['费用', `¥${money(item.fee)}`], ['日期', item.date], ['支付', item.paid ? '已支付' : '待支付'], ['备注', item.note || '—']],
+            bill: [['患者', patientName(item.patientId)], ['项目', item.service], ['金额', `¥${money(item.amount)}`], ['支付方式', item.method || '—'], ['开单日期', item.date], ['状态', item.status]]
+          };
+          return (maps[detail.type] || []).map(([label, value]) => ({ label, value: value === undefined || value === null || value === '' ? '—' : value }));
+        });
+        /* 打印单据：触发浏览器打印（配合 @media print 仅输出抽屉详情） */
+        const printDetail = () => window.print();
+
+        /* --- 全局键盘 Esc 关闭弹窗 --- */
+        const closeOnEscape = event => {
+          if (event.key !== 'Escape') return;
+          detail.show = false;
+          if (confirm.show) resolveConfirm(false);
+          if (appointmentModal.show) closeAppointment();
+          patientModal.show = false;
+          doctorModal.show = false;
+          recordModal.show = false;
+          billModal.show = false;
+        };
+
+         //10、生命周期与侦听器
+        onMounted(async () => {
+          window.addEventListener('resize', resizeCharts);
+          window.addEventListener('keydown', closeOnEscape);
+          window.addEventListener('dental-auth-expired', () => { clearSession(); toast('登录已失效', '请重新登录。', 'error'); });
+          if (await restoreSession()) {
+            view.value = visibleKeys.value.includes('dashboard') ? 'dashboard' : visibleKeys.value[0];
+            await loadAll(false);
+            await nextTick(renderCharts);
+          } else {
+            initialLoading.value = false;
+          }
+        });
+        watch(view, () => nextTick(renderCharts));
+        watch(() => [data.appointments, data.records], () => { if (view.value === 'dashboard') nextTick(renderCharts); }, { deep: true });
+
+        /* 搜索/过滤条件变化时，分页页码重置为 1；数据增删后自动收敛越界页码 */
+        watch([appointmentFilter, appointmentSearch], () => { pages.appointments = 1; });
+        watch(appointmentPageCount, count => { if (pages.appointments > count) pages.appointments = count; });
+        watch(patientSearch, () => { pages.patients = 1; });
+        watch(patientPageCount, count => { if (pages.patients > count) pages.patients = count; });
+        watch([recordFilter, recordSearch], () => { pages.records = 1; });
+        watch(recordPageCount, count => { if (pages.records > count) pages.records = count; });
+        watch(billFilter, () => { pages.bills = 1; });
+        watch(billPageCount, count => { if (pages.bills > count) pages.bills = count; });
+
+        /* --- 暴露给模板的响应式数据与方法 --- */
+        return {
+          today,currentUser, auth, quickUsernames, view, mobileOpen, initialLoading, loading, loadError, busy, users, summary, services, can, isDoctor, roleLabel,
+          visibleNavGroups, pageTitle, pageSub, money, initial, patientName, patientPhone, doctorName, appointmentClass, billClass,
+          todayPending, recentAppointments, trendData, serviceData,
+          appointmentTabs, appointmentFilter, appointmentSearch, filteredAppointments, appointmentPageCount, pagedAppointments, pages,
+          patients: data.patients, patientSearch, filteredPatients, patientPageCount, pagedPatients,
+          doctors: data.doctors, records: data.records, recordTabs, recordFilter, recordSearch, filteredRecords, recordPageCount, pagedRecords, toothRows,
+          bills: data.bills, billTabs, billFilter, filteredBills, billPageCount, pagedBills,
+          appointmentModal, patientModal, doctorModal, recordModal, billModal, slots, detail, confirm, toasts,
+          selectedSlotAvailable, slotSelectable, detailTitle, detailTypeLabel, detailRows, recordCountForDoctor,
+          goto, reloadCurrent, fillUsername, login, logout,
+          openAppointment, closeAppointment, loadSlots, saveAppointment, completeAppointment, cancelAppointment, deleteAppointment,
+          openPatient, savePatient, deletePatient,
+          openDoctor, saveDoctor, deleteDoctor,
+          openRecord, appendTag, toggleService, toggleTooth, saveRecord, deleteRecord,
+          openBill, saveBill, payBill, refundBill,
+          loadUsers, toggleUserStatus,
+          openDetail, printDetail, resolveConfirm
+        };
+      }
+    }).mount('#app');
+
+  </script>
+</body>
+
+</html>

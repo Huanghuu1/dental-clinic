@@ -1,0 +1,14 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "universal-clean-code-skill",
+  "owner": {
+    "name": "Huanghuu1"
+  },
+  "plugins": [
+    {
+      "name": "universal-clean-code-skill",
+      "source": "./",
+      "description": "Review and refactor local Java, Spring, Vue, JavaScript, TypeScript, and Python code with deterministic toolchain verification."
+    }
+  ]
+}

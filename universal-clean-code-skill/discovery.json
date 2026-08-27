@@ -1,0 +1,15 @@
+{
+  "outcome": "Review a local repository for actionable clean-code and framework-style findings, then verify with its configured formatter and test toolchain.",
+  "intended_users": ["software developers", "code reviewers", "Spring Boot maintainers", "frontend maintainers"],
+  "input_types": ["local source repository", "pom.xml", "package.json", "pyproject.toml", "Gradle build files"],
+  "output_artifacts": ["read-only JSON findings report", "formatter plan", "verification plan"],
+  "use_cases": ["Spring Controller/Service boundary review", "Vue SFC style review", "function length and nesting review", "toolchain-aware formatting verification"],
+  "examples": [
+    {"invocation": "/universal-clean-code-skill", "description": "Review the current repository without editing it"},
+    {"invocation": "/universal-clean-code-skill --project ./app", "description": "Review a named local project"}
+  ],
+  "permissions_systems": ["Read local source files", "Write only the requested report", "No network access", "No credentials"],
+  "typical_completion_time": "seconds to a few minutes depending on repository size",
+  "compatibility": {"declared": ["claude-code", "copilot", "codex", "gemini", "cursor", "windsurf", "cline", "roo-code", "kilo-code", "goose", "opencode", "kiro", "factory", "junie", "trae", "antigravity", "universal"], "certified": []},
+  "support_tier": "supported"
+}

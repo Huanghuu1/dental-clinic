@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.clinic.dental.AppointmentConcurrencyTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.562 s -- in com.clinic.dental.AppointmentConcurrencyTest
