@@ -35,7 +35,7 @@ public class Appointment {
     /** 就诊时段，如 09:30 */
     private String time;
 
-    /** 状态：待就诊 / 已完成 / 已取消 */
+    /** 状态：待就诊 / 候诊中 / 就诊中 / 已过号 / 已完成 / 已取消 */
     private String status;
 
     /** 初诊 / 复诊 */

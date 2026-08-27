@@ -541,6 +541,32 @@
       color: #9b6900
     }
 
+    /* 候诊中：柔和琥珀金 */
+    .status.waiting {
+      background: #fbe4b4;
+      color: #7a4f00
+    }
+
+    /* 就诊中：薄荷青背景 + 呼吸光晕 */
+    .status.calling {
+      background: #c9eee5;
+      color: #066059;
+      box-shadow: 0 0 0 0 rgba(8, 127, 120, 0.5);
+      animation: calling-pulse 1.8s ease-in-out infinite
+    }
+
+    /* 已过号：低饱和冷灰 */
+    .status.passed {
+      background: #eef1f0;
+      color: #7c8a86
+    }
+
+    @keyframes calling-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(8, 127, 120, 0.45) }
+      70% { box-shadow: 0 0 0 6px rgba(8, 127, 120, 0) }
+      100% { box-shadow: 0 0 0 0 rgba(8, 127, 120, 0) }
+    }
+
     .status.done,
     .status.paid {
       background: #e6f6ee;
@@ -1562,9 +1588,9 @@
                   <div class="kpi-note">含全部状态</div>
                 </article>
                 <article class="card kpi">
-                  <div class="kpi-label">待就诊</div>
-                  <div class="kpi-value">{{ summary.todayPending || 0 }}</div>
-                  <div class="kpi-note">今日尚待处理</div>
+                  <div class="kpi-label">今日待处理</div>
+                  <div class="kpi-value">{{ todayPending.length }}</div>
+                  <div class="kpi-note">待就诊 + 候诊中 + 就诊中</div>
                 </article>
                 <article class="card kpi">
                   <div class="kpi-label">本月新患者</div>
@@ -1697,12 +1723,19 @@
                         <td>
                           <div class="row-actions">
                             <button class="link-btn" type="button" @click="openDetail('appointment',item)">详情</button>
-                            <button v-if="item.status === '待就诊'" class="link-btn" type="button"
+                            <button v-if="can(['ADMIN','STAFF']) && (item.status === '待就诊' || item.status === '已过号')"
+                              class="link-btn" type="button" :disabled="busy.appointment" @click="checkInAppointment(item)">签到</button>
+                            <button v-if="can(['ADMIN','DOCTOR']) && item.status === '候诊中'" class="link-btn"
+                              type="button" :disabled="busy.appointment" @click="callPatient(item)">叫号</button>
+                            <button v-if="item.status === '候诊中' || item.status === '就诊中'" class="link-btn"
+                              type="button" :disabled="busy.appointment" @click="passNumber(item)">过号</button>
+                            <button v-if="item.status === '待就诊' || item.status === '已过号'" class="link-btn" type="button"
                               :disabled="busy.appointment" @click="openAppointment(item)">改期</button>
-                            <button v-if="item.status === '待就诊'" class="link-btn" type="button"
+                            <button v-if="item.status === '就诊中'" class="link-btn" type="button"
                               :disabled="busy.appointment" @click="completeAppointment(item)">完成</button>
-                            <button v-if="item.status === '待就诊'" class="link-btn danger" type="button"
-                              :disabled="busy.appointment" @click="cancelAppointment(item)">取消</button>
+                            <button v-if="item.status === '待就诊' || item.status === '候诊中' || item.status === '已过号'"
+                              class="link-btn danger" type="button" :disabled="busy.appointment"
+                              @click="cancelAppointment(item)">取消</button>
                             <button class="link-btn danger" type="button" :disabled="busy.appointment"
                               @click="deleteAppointment(item)">删除</button>
                           </div>
@@ -2159,15 +2192,32 @@
                 <button type="button" class="tag" @click="appendTag('complaint','冷热刺激痛')">冷热刺激痛</button>
                 <button type="button" class="tag" @click="appendTag('complaint','牙龈出血')">牙龈出血</button>
                 <button type="button" class="tag" @click="appendTag('complaint','夜间剧痛')">夜间剧痛</button>
+                <button type="button" class="tag" @click="appendTag('complaint','牙齿松动')">牙齿松动</button>
+                <button type="button" class="tag" @click="appendTag('complaint','要求洁牙')">要求洁牙</button>
               </div>
             </div>
             <div class="field full">
-              <label for="record-diagnosis">诊断</label>
+              <label for="record-examination">专科检查</label>
+              <textarea id="record-examination" v-model.trim="recordModal.form.examination" placeholder="探 / 叩 / 冷热测 / 牙周情况"></textarea>
+              <div class="quick-tags">
+                <button type="button" class="tag" @click="appendTag('examination','探痛(+)')">探痛(+)</button>
+                <button type="button" class="tag" @click="appendTag('examination','叩痛(-)')">叩痛(-)</button>
+                <button type="button" class="tag" @click="appendTag('examination','冷测敏感')">冷测敏感</button>
+                <button type="button" class="tag" @click="appendTag('examination','牙龈红肿')">牙龈红肿</button>
+                <button type="button" class="tag" @click="appendTag('examination','牙结石(++)')">牙结石(++)</button>
+                <button type="button" class="tag" @click="appendTag('examination','无明显松动')">无明显松动</button>
+              </div>
+            </div>
+            <div class="field full">
+              <label for="record-diagnosis">临床诊断</label>
               <input id="record-diagnosis" v-model.trim="recordModal.form.diagnosis" required>
               <div class="quick-tags">
                 <button type="button" class="tag" @click="appendTag('diagnosis','深龋')">深龋</button>
+                <button type="button" class="tag" @click="appendTag('diagnosis','慢性牙髓炎')">慢性牙髓炎</button>
                 <button type="button" class="tag" @click="appendTag('diagnosis','急性牙髓炎')">急性牙髓炎</button>
-                <button type="button" class="tag" @click="appendTag('diagnosis','牙周病')">牙周病</button>
+                <button type="button" class="tag" @click="appendTag('diagnosis','慢性牙周炎')">慢性牙周炎</button>
+                <button type="button" class="tag" @click="appendTag('diagnosis','牙列缺损')">牙列缺损</button>
+                <button type="button" class="tag" @click="appendTag('diagnosis','阻生智齿')">阻生智齿</button>
               </div>
             </div>
             <div class="field full"><label>诊疗服务</label>
@@ -2192,6 +2242,28 @@
                       :aria-pressed="recordModal.form.teeth.includes(tooth)" :aria-label="'FDI 牙位 '+tooth"
                       @click="toggleTooth(tooth)">{{ tooth }}</button></template></div>
                 <div class="help">已选：{{ recordModal.form.teeth.length ? recordModal.form.teeth.join('、') : '无' }}</div>
+              </div>
+            </div>
+            <div class="field full">
+              <label for="record-plan">治疗方案</label>
+              <textarea id="record-plan" v-model.trim="recordModal.form.treatmentPlan" placeholder="处置措施与治疗步骤"></textarea>
+              <div class="quick-tags">
+                <button type="button" class="tag" @click="appendTag('treatmentPlan','开髓引流')">开髓引流</button>
+                <button type="button" class="tag" @click="appendTag('treatmentPlan','根管预备')">根管预备</button>
+                <button type="button" class="tag" @click="appendTag('treatmentPlan','树脂充填')">树脂充填</button>
+                <button type="button" class="tag" @click="appendTag('treatmentPlan','超声波洁牙')">超声波洁牙</button>
+                <button type="button" class="tag" @click="appendTag('treatmentPlan','局麻下拔除')">局麻下拔除</button>
+                <button type="button" class="tag" @click="appendTag('treatmentPlan','全瓷冠修复')">全瓷冠修复</button>
+              </div>
+            </div>
+            <div class="field full">
+              <label for="record-prescription">处方用药</label>
+              <textarea id="record-prescription" v-model.trim="recordModal.form.prescription" placeholder="药品名称与用量"></textarea>
+              <div class="quick-tags">
+                <button type="button" class="tag" @click="appendTag('prescription','甲硝唑片 0.2g*20片')">甲硝唑片 0.2g*20片</button>
+                <button type="button" class="tag" @click="appendTag('prescription','阿莫西林胶囊 0.5g*24粒')">阿莫西林胶囊 0.5g*24粒</button>
+                <button type="button" class="tag" @click="appendTag('prescription','复方氯己定含漱液 250ml')">复方氯己定含漱液 250ml</button>
+                <button type="button" class="tag" @click="appendTag('prescription','布洛芬缓释胶囊 0.3g*10粒')">布洛芬缓释胶囊 0.3g*10粒</button>
               </div>
             </div>
             <div class="field"><label for="record-fee">费用</label><input id="record-fee"
@@ -2496,7 +2568,7 @@
         const doctorName = id => (doctor(id) || {}).name || '未知医生';
 
         /* --- 状态样式映射 --- */
-        const appointmentClass = status => ({ '待就诊': 'pending', '已完成': 'done', '已取消': 'cancelled' })[status] || 'cancelled';
+        const appointmentClass = status => ({ '待就诊': 'pending', '候诊中': 'waiting', '就诊中': 'calling', '已过号': 'passed', '已完成': 'done', '已取消': 'cancelled' })[status] || 'cancelled';
         const billClass = status => ({ '待支付': 'pending', '已支付': 'paid', '已退款': 'refunded' })[status] || 'cancelled';
 
         /* --- 轻提示与确认弹窗 --- */
@@ -2606,7 +2678,7 @@
         };
 
         /* --- 仪表盘派生数据 --- */
-        const todayPending = computed(() => data.appointments.filter(item => item.date === today() && item.status === '待就诊'));
+        const todayPending = computed(() => data.appointments.filter(item => item.date === today() && ['待就诊', '候诊中', '就诊中'].includes(item.status)));
         const recentAppointments = computed(() => [...data.appointments].sort((a, b) => Number(b.id) - Number(a.id)).slice(0, 6));
         const trendData = computed(() => Array.from({ length: 7 }, (_, index) => {
           const date = new Date();
@@ -2655,11 +2727,11 @@
         const resizeCharts = () => Object.values(charts).forEach(chart => chart.resize());
 
          //3、预约管理
-        const appointmentTabs = [{ key: 'all', label: '全部' }, { key: 'pending', label: '待就诊' }, { key: 'done', label: '已完成' }, { key: 'cancelled', label: '已取消' }];
+        const appointmentTabs = [{ key: 'all', label: '全部' }, { key: 'pending', label: '待就诊' }, { key: 'waiting', label: '候诊中' }, { key: 'calling', label: '就诊中' }, { key: 'passed', label: '已过号' }, { key: 'done', label: '已完成' }, { key: 'cancelled', label: '已取消' }];
 
         /* 全量过滤结果（用于计数与假分页切片） */
         const filteredAppointments = computed(() => data.appointments.filter(item => {
-          const statusOk = appointmentFilter.value === 'all' || ({ pending: '待就诊', done: '已完成', cancelled: '已取消' })[appointmentFilter.value] === item.status;
+          const statusOk = appointmentFilter.value === 'all' || ({ pending: '待就诊', waiting: '候诊中', calling: '就诊中', passed: '已过号', done: '已完成', cancelled: '已取消' })[appointmentFilter.value] === item.status;
           const q = appointmentSearch.value;
           const queryOk = !q || patientName(item.patientId).includes(q) || String(item.code || '').includes(q) || String(item.date || '').includes(q);
           return statusOk && queryOk;
@@ -2749,6 +2821,24 @@
           catch (error) { toast('操作失败', error.message, 'error'); }
           finally { busy.appointment = false; }
         };
+        const checkInAppointment = async item => {
+          busy.appointment = true;
+          try { await request(`/appointments/${item.id}/checkin`, { method: 'POST' }); await refresh(['appointments', 'summary']); toast('已签到', `${patientName(item.patientId)} 已候诊`); }
+          catch (error) { toast('签到失败', error.message, 'error'); }
+          finally { busy.appointment = false; }
+        };
+        const callPatient = async item => {
+          busy.appointment = true;
+          try { await request(`/appointments/${item.id}/call`, { method: 'POST' }); await refresh(['appointments', 'summary']); toast('已叫号', `${patientName(item.patientId)} 开始就诊`); }
+          catch (error) { toast('叫号失败', error.message, 'error'); }
+          finally { busy.appointment = false; }
+        };
+        const passNumber = async item => {
+          busy.appointment = true;
+          try { await request(`/appointments/${item.id}/pass`, { method: 'POST' }); await refresh(['appointments', 'summary']); toast('已过号', patientName(item.patientId)); }
+          catch (error) { toast('过号失败', error.message, 'error'); }
+          finally { busy.appointment = false; }
+        };
         const deleteAppointment = async item => {
           if (!(await ask('删除预约', `确认删除 ${patientName(item.patientId)} 的预约记录？`, '删除'))) return;
           busy.appointment = true;
@@ -2825,7 +2915,7 @@
         /* FDI 牙位象限布局 */
         const toothRows = [[18, 17, 16, 15, 14, 13, 12, 11], [21, 22, 23, 24, 25, 26, 27, 28], [48, 47, 46, 45, 44, 43, 42, 41], [31, 32, 33, 34, 35, 36, 37, 38]];
 
-        const emptyRecord = () => ({ patientId: null, doctorId: isDoctor.value ? currentUser.value.doctorId : null, complaint: '', diagnosis: '', services: [], teeth: [], fee: 0, date: today(), paid: false, note: '' });
+        const emptyRecord = () => ({ patientId: null, doctorId: isDoctor.value ? currentUser.value.doctorId : null, complaint: '', examination: '', diagnosis: '', treatmentPlan: '', prescription: '', services: [], teeth: [], fee: 0, date: today(), paid: false, note: '' });
         const openRecord = item => {
           recordModal.editing = Boolean(item);
           recordModal.isManual = Boolean(item); // 编辑模式下默认不自动算钱
@@ -2863,7 +2953,7 @@
           if (!form.patientId || !form.doctorId || !form.diagnosis || !form.services.length) { toast('请完善医疗记录', '患者、医生、诊断和至少一项服务为必填。', 'error'); return; }
           busy.record = true;
           const payload = {
-            patientId: form.patientId, doctorId: form.doctorId, complaint: form.complaint, diagnosis: form.diagnosis,
+            patientId: form.patientId, doctorId: form.doctorId, complaint: form.complaint, examination: form.examination, diagnosis: form.diagnosis, treatmentPlan: form.treatmentPlan, prescription: form.prescription,
             services: listify(form.services).join(','), teeth: form.teeth.join(','), fee: Number(form.fee || 0),
             date: form.date || today(), paid: isDoctor.value ? false : Boolean(form.paid), note: form.note,
             ...(recordModal.editing && form.code ? { code: form.code } : {})
@@ -2959,7 +3049,7 @@
             patient: [['姓名', item.name], ['性别', item.gender], ['年龄', item.age], ['联系电话', item.phone], ['血型', item.bloodType], ['过敏史', item.allergy || '无'], ['地址', item.address || '—'], ['备注', item.note || '—']],
             doctor: [['姓名', item.name], ['职称', item.title], ['从业年限', `${item.years || 0} 年`], ['专长', (item.spec || []).join('、') || '—']],
             appointment: [['患者', patientName(item.patientId)], ['医生', doctorName(item.doctorId)], ['项目', item.type], ['日期', item.date], ['时段', item.time], ['状态', item.status], ['就诊类型', item.visitType], ['备注', item.note || '—']],
-            record: [['患者', patientName(item.patientId)], ['医生', doctorName(item.doctorId)], ['主诉', item.complaint || '—'], ['诊断', item.diagnosis || '—'], ['服务', (item.services || []).join('、')], ['牙位', (item.teeth || []).join('、') || '—'], ['费用', `¥${money(item.fee)}`], ['日期', item.date], ['支付', item.paid ? '已支付' : '待支付'], ['备注', item.note || '—']],
+            record: [['患者', patientName(item.patientId)], ['医生', doctorName(item.doctorId)], ['主诉', item.complaint || '—'], ['专科检查', item.examination || '—'], ['诊断', item.diagnosis || '—'], ['治疗方案', item.treatmentPlan || '—'], ['处方用药', item.prescription || '—'], ['服务', (item.services || []).join('、')], ['牙位', (item.teeth || []).join('、') || '—'], ['费用', `¥${money(item.fee)}`], ['日期', item.date], ['支付', item.paid ? '已支付' : '待支付'], ['备注', item.note || '—']],
             bill: [['患者', patientName(item.patientId)], ['项目', item.service], ['金额', `¥${money(item.amount)}`], ['支付方式', item.method || '—'], ['开单日期', item.date], ['状态', item.status]]
           };
           return (maps[detail.type] || []).map(([label, value]) => ({ label, value: value === undefined || value === null || value === '' ? '—' : value }));
@@ -3017,7 +3107,7 @@
           appointmentModal, patientModal, doctorModal, recordModal, billModal, slots, detail, confirm, toasts,
           selectedSlotAvailable, slotSelectable, detailTitle, detailTypeLabel, detailRows, recordCountForDoctor,
           goto, reloadCurrent, fillUsername, login, logout,
-          openAppointment, closeAppointment, loadSlots, saveAppointment, completeAppointment, cancelAppointment, deleteAppointment,
+          openAppointment, closeAppointment, loadSlots, saveAppointment, completeAppointment, cancelAppointment, checkInAppointment, callPatient, passNumber, deleteAppointment,
           openPatient, savePatient, deletePatient,
           openDoctor, saveDoctor, deleteDoctor,
           openRecord, appendTag, toggleService, toggleTooth, saveRecord, deleteRecord,

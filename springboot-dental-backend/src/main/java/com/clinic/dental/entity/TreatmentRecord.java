@@ -30,8 +30,17 @@ public class TreatmentRecord {
     /** 主诉 */
     private String complaint;
 
+    /** 口腔专科检查（探/叩/冷热测/牙周情况） */
+    private String examination;
+
     /** 诊断结果 */
     private String diagnosis;
+
+    /** 治疗方案与处置措施 */
+    private String treatmentPlan;
+
+    /** 处方用药 */
+    private String prescription;
 
     /** 治疗项目，逗号分隔，如：补牙（树脂）,根管治疗 */
     private String services;

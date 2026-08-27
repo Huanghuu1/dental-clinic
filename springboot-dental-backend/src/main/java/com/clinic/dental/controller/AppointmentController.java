@@ -94,6 +94,27 @@ public class AppointmentController {
         return appointmentService.completeAppointment(id);
     }
 
+    /** 患者到店签到：待就诊/已过号 → 候诊中。 */
+    @PostMapping("/{id}/checkin")
+    public Appointment checkIn(@PathVariable Long id) {
+        verifyOwnership(id);
+        return appointmentService.checkIn(id);
+    }
+
+    /** 医生叫号接诊：候诊中 → 就诊中。 */
+    @PostMapping("/{id}/call")
+    public Appointment call(@PathVariable Long id) {
+        verifyOwnership(id);
+        return appointmentService.callPatient(id);
+    }
+
+    /** 标记过号：候诊中/就诊中 → 已过号。 */
+    @PostMapping("/{id}/pass")
+    public Appointment pass(@PathVariable Long id) {
+        verifyOwnership(id);
+        return appointmentService.passNumber(id);
+    }
+
     /** 取消预约并恢复号源。 */
     @PostMapping("/{id}/cancel")
     public Appointment cancel(@PathVariable Long id) {
